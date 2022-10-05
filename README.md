@@ -1,6 +1,6 @@
 # Rust By Example
 
-Learning and annotations from the [Rust Be Example book]() 
+Learning and annotations from the [Rust Be Example book](https://doc.rust-lang.org/stable/rust-by-example/) 
 
 ## Chapters
 
