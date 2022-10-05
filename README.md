@@ -13,7 +13,7 @@ Learning and annotations from the [Rust Be Example book]()
     NoValue --> Valid: assign value to variable
 
     state Valid {
-        [*] --> HeapValue 
+        [*] --> HeapValue: /if dynamic length
         HeapValue --> HeapValue: assign to variable
         HeapValue --> HeapValue: pass to function
         note right of HeapValue
@@ -22,7 +22,7 @@ Learning and annotations from the [Rust Be Example book]()
             a copy on the new variable
         end note
         --
-        [*] --> StackValue
+        [*] --> StackValue: /if fixed length
         note left of StackValue
             variable assignment:
             moves ownership into new variable
