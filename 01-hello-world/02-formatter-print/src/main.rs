@@ -98,6 +98,32 @@ fn impl_display_implements_to_string() {
     // when we implement Display
     let foo_string = a.to_string();
     println!("Foo.to_string: {}", foo_string);
+    println!();
+}
+
+fn display_vs_debug() {
+    #[derive(Debug)]
+    struct MinMax(i8, i8);
+
+    impl fmt::Display for MinMax {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write!(f, "({}, {})", &self.0, &self.1)
+        }
+    }
+
+    impl fmt::Binary for MinMax {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write!(f, "({:b}, {:b})", &self.0, &self.1)
+        }
+    }
+
+    let min_max = MinMax(-5, 10);
+
+    println!("Debug min_max: {min_max:?}");
+    println!("Pretty-print min_max: {min_max:#?}");
+    println!("Display min_max: {min_max}");
+    println!("alternate Display min_max: {min_max:#}");
+    println!("Binary min_max: {min_max:b}");
 }
 
 fn main() {
@@ -106,4 +132,5 @@ fn main() {
     indentation();
     format_characters();
     impl_display_implements_to_string();
+    display_vs_debug();
 }

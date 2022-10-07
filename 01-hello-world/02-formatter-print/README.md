@@ -38,15 +38,16 @@
   println!("{:width$}", 42); // => 00004
   ```
 
-### Additional
+### Debug
 
-- `#[allow(dead_code)]` allows for defining structs that aren't used:
+- any type that wants to be formatted as a string needs to implement a trait
+  from `std::fmt`
+- all types can derive `std::fmt::Debug` automatically
 
-  ```rust
-  #[allow(dead_code)]
-  struct UnusedStruct {}
-  ```
+### Display
 
+- unlike `std::fmt::Debug`, `std::fmt::Display` needs to manually implemented
+- `std::fmt::Display` gives full control over how a value is rendered
 - implementing `Display` automatically implements the `ToString` trait on the
   type, adding the `to_string` method to instances:
 
@@ -56,6 +57,10 @@
   impl fmt::Display for MyStruct {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
       write!(f, "hello there", &self.bar)
+      // [1][2] [           3          =
+
+      // 1 - write the given formatted string at 3
+      // 2 - to the given output stream, f
     }
   }
 
@@ -63,4 +68,20 @@
   let a_string = a.to_string();
 
   println!("{a}"); // => hello there
+  ```
+
+- Rust doesn't implement `Display` on any types in the `std` library - there's
+  no way to implement `Display` consistently on generic types such as
+  `Vec<T>`, thus it's not implemented for any type
+- related to generics, `Display` can be implemented on any non-generic type
+- as with `Display`, `{:b}` requires `fmt::Binary` to be manually implemented on
+  the type
+
+### Additional
+
+- `#[allow(dead_code)]` allows for defining structs that aren't used:
+
+  ```rust
+  #[allow(dead_code)]
+  struct UnusedStruct {}
   ```
