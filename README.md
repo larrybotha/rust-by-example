@@ -1,12 +1,16 @@
 # Rust By Example
 
-Learning and annotations from the [Rust By Example book](https://doc.rust-lang.org/stable/rust-by-example/) 
+Learning and annotations from the [Rust By Example book](https://doc.rust-lang.org/stable/rust-by-example/)
 
 ## Chapters
+
+- [Hello World](./01-hello-world)
+  - [Formatted Print](./01-hello-world/02-formatter-print)
 
 ## TODO
 
 - move graph to chapter on ownership:
+
   ```mermaid
   stateDiagram-v2
     [*] --> NoValue
