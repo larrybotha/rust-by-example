@@ -85,3 +85,22 @@
   #[allow(dead_code)]
   struct UnusedStruct {}
   ```
+
+- `?` may be appended to types that return `Result`. If `Result` returns an
+  error, `?` will panic, otherwise it unwraps the value returned in `Ok`
+  - see the [questions mark docs](https://doc.rust-lang.org/stable/rust-by-example/std/result/question_mark.html)
+- an array can be converted to a vector using `.to_vec`:
+
+  ```rust
+  let a = [1,2,3];
+  let v = a.to_vec();
+  ```
+
+- Rust's ternary reads more naturally than Python's ternary:
+
+  ```rust
+  let result = if true { "foo" } else { "bar" };
+  ```
+
+  The braces are expressions - the return value of whichever block the condition
+  evaluates to is what the variable will be bound to
