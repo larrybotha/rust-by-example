@@ -1,6 +1,7 @@
 # Primitives
 
 - https://doc.rust-lang.org/stable/rust-by-example/primitives.html
+- https://doc.rust-lang.org/stable/book/ch03-02-data-types.html
 - https://doc.rust-lang.org/std/#primitives
 
 ## Takeaways
