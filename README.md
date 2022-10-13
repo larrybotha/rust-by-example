@@ -7,6 +7,7 @@ Learning and annotations from the [Rust By Example book](https://doc.rust-lang.o
 - [Hello World](./01-hello-world)
   - [Formatted Print](./01-hello-world/02-formatter-print)
 - [Primitives](./02-primitives)
+- [Custom Types](./03-custom-types)
 
 ## TODO
 
