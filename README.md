@@ -9,6 +9,10 @@ Learning and annotations from the [Rust By Example book](https://doc.rust-lang.o
 - [Primitives](./02-primitives)
 - [Custom Types](./03-custom-types)
 
+## Links and resources
+
+- [A half hour to learn Rust](https://fasterthanli.me/articles/a-half-hour-to-learn-rust)
+
 ## TODO
 
 - move graph to chapter on ownership:
