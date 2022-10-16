@@ -150,6 +150,228 @@ fn struct_exercise() {
 
     println!("square: {:?}", &square);
     println!("square area: {}", square.area());
+    println!();
+}
+
+fn enum_variants() {
+    #[derive(Debug)]
+    #[allow(dead_code)]
+    enum MyEnum {
+        Unit,
+        Tuple(i32),
+        CLike { foo: String },
+    }
+
+    let _x = MyEnum::Unit; // <= type is MyEnum
+
+    println!("{:?}", MyEnum::Unit);
+    println!("{:?}", MyEnum::Tuple(3));
+    println!(
+        "{:?}",
+        MyEnum::CLike {
+            foo: String::from("bar")
+        }
+    );
+    println!();
+}
+
+fn enum_matching() {
+    #[derive(Debug)]
+    enum ScrollDir {
+        Up,
+        Down,
+        Left,
+        Right,
+    }
+
+    enum Event {
+        MouseClick(i32, i32),
+        KeyPress(char),
+        Scroll(ScrollDir),
+    }
+
+    fn handle_event(event: Event) {
+        match event {
+            Event::MouseClick(x, y) => println!("clicked at ({x}, {y})"),
+            Event::KeyPress(x) => println!("pressed key {x}"),
+            Event::Scroll(dir) => println!("scrolled {dir:?}"),
+        }
+    }
+
+    let mouse_click = Event::MouseClick(32, 4);
+    let key_press = Event::KeyPress('m');
+    let scroll = Event::Scroll(ScrollDir::Right);
+
+    handle_event(mouse_click);
+    handle_event(key_press);
+    handle_event(scroll);
+    println!();
+}
+
+fn enum_aliases() {
+    #[derive(Debug)]
+    enum IReallyLoveCarpeting {
+        A,
+        B,
+        C,
+    }
+
+    // alias IReallyLoveCarpeting
+    type Carpeting = IReallyLoveCarpeting;
+
+    // variants are accessible via the alias
+    let a = Carpeting::A;
+    let b = Carpeting::B;
+    let c = Carpeting::C;
+
+    println!("{a:?}, {b:?}, {c:?}");
+    println!();
+}
+
+fn enum_self() {
+    #[derive(Debug)]
+    enum Operations {
+        Sum,
+        Product,
+    }
+
+    impl Operations {
+        fn do_operation(&self, x: i32, y: i32) -> i32 {
+            match &self {
+                Self::Sum => x + y,
+                Self::Product => x * y,
+            }
+        }
+    }
+
+    let sum = Operations::Sum;
+    let product = Operations::Product;
+    let x = 3;
+    let y = 5;
+
+    println!("sum({x}, {y}) = {}", sum.do_operation(x, y));
+    println!("product({x}, {y}) = {}", product.do_operation(x, y));
+    println!();
+}
+
+#[derive(Debug)]
+enum TopLevelOne {
+    OneA,
+    OneB,
+}
+#[derive(Debug)]
+enum TopLevelTwo {
+    TwoA,
+    TwoB,
+}
+
+fn enum_use() {
+    // allow variants in the outer scope to be used without manually scoping
+    // each variant
+    use crate::TopLevelOne::{OneA, OneB as HeyB};
+    use crate::TopLevelTwo::*;
+
+    let one_a = OneA;
+    let one_b = HeyB;
+    let two_a = TwoA;
+    let two_b = TwoB;
+
+    println!("one_a: {one_a:?}");
+    println!("one_b: {one_b:?}");
+    println!("two_a: {two_a:?}");
+    println!("two_b: {two_b:?}");
+    println!();
+}
+
+fn enum_discriminators() {
+    enum ImplicitDiscriminator {
+        First,
+        Second,
+    }
+
+    enum ExplicitDiscriminator {
+        First = 999,
+        Second = 1_000,
+    }
+
+    println!(
+        "ImplicitDiscriminator::First: {}",
+        ImplicitDiscriminator::First as i32
+    );
+    println!(
+        "ImplicitDiscriminator::Second: {}",
+        ImplicitDiscriminator::Second as i32
+    );
+    println!(
+        "ExplicitDiscriminator::First: {}",
+        ExplicitDiscriminator::First as i32
+    );
+    println!(
+        "ExplicitDiscriminator::Second: {}",
+        ExplicitDiscriminator::Second as i32
+    );
+    println!();
+}
+
+enum List {
+    // a node in a linked list containing a value, and a pointer to the next node
+    Cons(u32, Box<List>),
+    // the end of the linked list
+    Nil,
+}
+
+impl List {
+    // create an empty list
+    fn new() -> List {
+        Self::Nil
+    }
+
+    // prepend a value to the current list and return it
+    fn prepend(self, elem: u32) -> List {
+        Self::Cons(elem, Box::new(self))
+    }
+
+    // get the length of the list
+    fn len(&self) -> u32 {
+        // `self` has type &List
+        // `*self` has type List
+        //      => matching on a concrete type is described as being better....
+        //          but not yet sure why that is
+        match *self {
+            // not yet sure what `ref` is doing here - &tail doesn't compile
+            Self::Cons(_, ref tail) => 1 + tail.len(),
+            Self::Nil => 0,
+        }
+    }
+
+    fn stringify(&self) -> String {
+        // again, matching on concrete type rather than a reference
+        match *self {
+            Self::Cons(head, ref tail) => format!("{} {}", head, tail.stringify()),
+            Self::Nil => "Nil".to_string(),
+        }
+    }
+}
+
+fn enum_linked_list() {
+    let mut list = List::new();
+
+    list = list.prepend(3);
+    list = list.prepend(4);
+    list = list.prepend(5);
+
+    println!("list: {}", &list.stringify());
+    println!("list length: {}", &list.len());
+    println!();
+}
+
+const I_AM_GLOBAL: &str = "I am global!";
+
+fn const_definitions() {
+    const I_AM_LOCAL: &str = "I am local!";
+
+    println!("{}", I_AM_GLOBAL);
+    println!("{}", I_AM_LOCAL);
 }
 
 fn main() {
@@ -160,4 +382,16 @@ fn main() {
     struct_update_syntax();
     struct_destructuring();
     struct_exercise();
+
+    // enums
+    enum_variants();
+    enum_matching();
+    enum_aliases();
+    enum_self();
+    enum_use();
+    enum_discriminators();
+    enum_linked_list();
+
+    // constants
+    const_definitions();
 }
