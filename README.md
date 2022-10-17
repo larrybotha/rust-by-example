@@ -8,6 +8,7 @@ Learning and annotations from the [Rust By Example book](https://doc.rust-lang.o
   - [Formatted Print](./01-hello-world/02-formatter-print)
 - [Primitives](./02-primitives)
 - [Custom Types](./03-custom-types)
+- [Variable Bindings](./04-variable-bindings)
 
 ## Links and resources
 
