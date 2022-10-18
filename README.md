@@ -10,6 +10,7 @@ Learning and annotations from the [Rust By Example book](https://doc.rust-lang.o
 - [Custom Types](./03-custom-types)
 - [Variable Bindings](./04-variable-bindings)
 - [Types](./05-types)
+- [Conversion](./06-conversion)
 
 ## Links and resources
 
