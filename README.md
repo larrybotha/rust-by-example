@@ -10,10 +10,12 @@ Learning and annotations from the [Rust By Example book](https://doc.rust-lang.o
 - [Custom Types](./03-custom-types)
 - [Variable Bindings](./04-variable-bindings)
 - [Types](./05-types)
+- [Conversion](./06-conversion)
 
 ## Links and resources
 
 - [A half hour to learn Rust](https://fasterthanli.me/articles/a-half-hour-to-learn-rust)
+- [Learn Rust The Dangerous Way](http://cliffle.com/p/dangerust/)
 
 ## TODO
 
