@@ -11,6 +11,7 @@ Learning and annotations from the [Rust By Example book](https://doc.rust-lang.o
 - [Variable Bindings](./04-variable-bindings)
 - [Types](./05-types)
 - [Conversion](./06-conversion)
+- [Expressions](./07-expressions)
 
 ## Links and resources
 
