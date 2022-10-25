@@ -121,6 +121,16 @@
   - enums
   - pointers
   - structures
+- matched values in `match` blocks can be named for access inside the the match:
+
+  ```rust
+  let x = 2;
+
+  match x {
+    z @ 2 => println!("z: {z}"),
+    _ => println!("no match")
+  }
+  ```
 
 ### Additional
 
@@ -132,4 +142,19 @@
   ```rust
   let x = 5;
   let y = if x > 0 { true } else { false };
+  ```
+
+- references are dereferenced with `*`
+- destructuring of references can be done using `&`, `ref`, or `ref mut`
+- variables can be assigned as references, as opposed to a reference being
+  created from another value:
+
+  ```rust
+  let x = 4;
+  let ref_x = &4;
+
+  // vs
+  let ref_x = &4; // <= a reference at assignment
+  // or
+  let ref ref_x = 4; // <= a reference at assignment
   ```
