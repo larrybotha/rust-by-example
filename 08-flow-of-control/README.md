@@ -85,7 +85,7 @@
 
 - `while` in Rust is similar to other languages, with the same syntax as `loop`
 
-### `for` loops
+### `for` and range
 
 - the `for in` syntax, similar to Python's, is used to iterate over `Iterator`s
 - a range is an `Iterator`:
@@ -106,6 +106,21 @@
   - `.iter_mut` - will process each item in the iterator as a mutable borrowed
     value, allowing for mutating the original collection
 - by default, `for in` uses `.into_iter` on collections
+
+### `match`
+
+- as with matching in Haskell, all branches in a `match` statement in Rust must
+  be provided
+- as in Haskell, `_` is the catch-all
+
+#### Destructuring
+
+- `match` blocks can destructure a variety of items:
+  - tuples
+  - arrays and slices
+  - enums
+  - pointers
+  - structures
 
 ### Additional
 

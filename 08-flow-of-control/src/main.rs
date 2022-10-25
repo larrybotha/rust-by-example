@@ -185,6 +185,34 @@ fn for_into_iter_mut() {
     println!();
 }
 
+#[allow(unreachable_patterns)]
+fn match_tuple() {
+    let tuple = (3.2, 1, "foo");
+
+    // named values on match
+    match tuple {
+        (x, 1, y) => println!("x: {x}, y: {y}"),
+        _ => println!("no match!"),
+    }
+
+    // always match, skip remaining
+    match tuple {
+        (x, ..) => println!("first is {x}"),
+        _ => println!("no match!"),
+    }
+
+    match tuple {
+        (_, second @ 1, ..) => println!("second is named and is {second}"),
+        _ => println!("no match!"),
+    }
+
+    // skip everythin but last
+    match tuple {
+        (.., last) => println!("last is {last}"),
+        _ => println!("no match!"),
+    }
+}
+
 fn main() {
     if_else_no_parens();
     if_else_expressions();
@@ -197,4 +225,6 @@ fn main() {
 
     for_example();
     for_into_iter_mut();
+
+    match_tuple();
 }
