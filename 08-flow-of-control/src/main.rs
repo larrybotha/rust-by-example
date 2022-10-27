@@ -351,6 +351,26 @@ fn match_struct() {
         p @ Point { x: i, y: 2 } => println!("when y is 2, x is {i} for {p:?}"),
         _ => println!("no match"),
     }
+    println!();
+}
+
+fn match_guards() {
+    #[allow(dead_code)]
+    enum Number {
+        Integer(i32),
+        Decimal(f32),
+    }
+
+    let x = Number::Integer(3);
+
+    match x {
+        Number::Integer(z) if z > 10 => println!("greater than 10: {z}"),
+        Number::Integer(z) if z < 5 => println!("less than 5: {z}"),
+        Number::Integer(z) => println!("something else: {z}"),
+        Number::Decimal(..) => println!("a decimal"),
+    }
+
+    println!();
 }
 
 fn main() {
@@ -371,4 +391,5 @@ fn main() {
     match_enums();
     match_refs_pointers();
     match_struct();
+    match_guards();
 }

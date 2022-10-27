@@ -132,6 +132,30 @@
   }
   ```
 
+### Guards
+
+- guards in `match` blocks work similarly to guards in Haskell; a value that
+  matches multiple branches conditions will be evaluated against the guards
+  for those branches
+
+  ```rust
+  enum Number {
+    Integer(i32),
+    Decimal(float32)
+  }
+
+  let x = Number::Integer(4);
+
+  match x {
+    Number::Integer(z) if z > 5 => println!("x is an integer greater than 5: {z}"),
+    Number::Integer(z) => println!("x is an integer not greater than 5: {z}"),
+    _ => println!("x is a decimal")
+  }
+  ```
+
+- Rust's compiler won't infer whether a catch-all is optional for `match` blocks
+  containing guards - the catch-all is required
+
 ### Additional
 
 - `String.is_empty()` is syntactic sugare for `String.len() > 0`
