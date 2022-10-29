@@ -132,7 +132,7 @@
   }
   ```
 
-### Guards
+#### Guards
 
 - guards in `match` blocks work similarly to guards in Haskell; a value that
   matches multiple branches conditions will be evaluated against the guards
@@ -155,6 +155,41 @@
 
 - Rust's compiler won't infer whether a catch-all is optional for `match` blocks
   containing guards - the catch-all is required
+
+#### Binding
+
+- values in match branches can be bound to names so that they can be used inside
+  the block:
+
+  ```rust
+
+  let x = 5;
+
+  match x {
+    n @ 1..=10 => println!("x is in the range 1-9: {n}"),
+    _ => println!("x is not in range")
+  }
+  ```
+
+### `if let`
+
+- matching on a single value is awkward, so Rust provides syntactic sugar via
+  `if let` to mitigate having to match on the catch-all branch:
+
+  ```rust
+  let x: Option<i32> = 5;
+
+  match x {
+    Some(n) => println!("we've got something!"),
+    _ => {}
+  }
+
+  // vs
+
+  if let Some(n) = x {
+    println!("we've got something!")
+  }
+  ```
 
 ### Additional
 
@@ -181,4 +216,21 @@
   let ref_x = &4; // <= a reference at assignment
   // or
   let ref ref_x = 4; // <= a reference at assignment
+  ```
+
+- values in `match` blocks can be matched against ranges:
+
+  ```rust
+  let x: Option<i32> = 5;
+  let y = 'n';
+
+  match x {
+    Some(n @ 1..=10) => println!("x is in range"),
+    _ => println!("x is not in range"),
+  }
+
+  match y {
+    n @ 'a'..='z' => println!("y is lowercase"),
+    _ => println!("y is not lowercase"),
+  }
   ```

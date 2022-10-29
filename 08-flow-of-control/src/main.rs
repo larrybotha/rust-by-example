@@ -373,6 +373,25 @@ fn match_guards() {
     println!();
 }
 
+fn match_binding() {
+    let x = 5;
+
+    match x {
+        n @ 1..=10 => println!("some_num() is in range 1 to 10: {n}"),
+        _ => println!("not in range"),
+    }
+
+    let z: Option<char> = Some('m');
+
+    match z {
+        Some(n @ 'a'..='z') => println!("z is lowercase: {n}"),
+        Some(n @ 'A'..='Z') => println!("z is uppercase: {n}"),
+        _ => println!("z is not in the alphabet"),
+    }
+
+    println!();
+}
+
 fn main() {
     if_else_no_parens();
     if_else_expressions();
@@ -392,4 +411,5 @@ fn main() {
     match_refs_pointers();
     match_struct();
     match_guards();
+    match_binding();
 }
