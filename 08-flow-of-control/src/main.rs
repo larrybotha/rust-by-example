@@ -392,6 +392,127 @@ fn match_binding() {
     println!();
 }
 
+fn if_let() {
+    let x: Option<i32> = Some(5);
+
+    #[allow(clippy::single_match)]
+    match x {
+        Some(..) => println!("we got something!"),
+        _ => {}
+    }
+
+    // vs
+
+    if let Some(..) = x {
+        println!("we got something more tersely!")
+    }
+
+    println!();
+}
+
+fn if_let_else() {
+    let x: Option<i32> = None;
+
+    if let Some(..) = x {
+        println!("we got something!")
+    } else {
+        println!("guess we got nothing")
+    }
+
+    let y: Option<char> = Some('m');
+
+    if let Some(..) = x {
+        println!("got x")
+    } else if let Some(c) = y {
+        println!("got y: {c}")
+    } else {
+        println!("nada")
+    }
+
+    println!();
+}
+
+fn if_let_enum() {
+    #[derive(Debug)]
+    enum Foo {
+        A,
+        B,
+        C(u32),
+    }
+
+    let a = Foo::A;
+    let b = Foo::B;
+    let c = Foo::C(42);
+
+    // match on enum
+    if let Foo::A = a {
+        println!("'a' is Foo::A")
+    }
+
+    // will do nothing
+    if let Foo::B = a {
+        println!("'a' is Foo::B")
+    }
+
+    // if let with binding
+    if let x @ Foo::B = b {
+        println!("'b' is {x:?}")
+    }
+
+    // if let ref with binding inside enum / struct
+    if let ref x @ Foo::C(n @ 42) = c {
+        println!("'c' is {n} from borrowed enum {x:?}")
+    }
+
+    println!();
+}
+
+fn if_let_equality() {
+    enum Foo {
+        A,
+    }
+
+    let a = Foo::A;
+
+    // does not compile
+    //if a == Foo::A {
+    //    println!("does not compile unless Foo implements 'PartialEq'")
+    //}
+
+    if let Foo::A = a {
+        println!("a is Foo::A")
+    }
+
+    println!();
+}
+
+fn while_let() {
+    let mut x: Option<i32> = Some(5);
+
+    println!("x before: {x:?}");
+
+    // without while let
+    loop {
+        match x {
+            Some(n) if n > 0 => x = Some(n - 1),
+            _ => break,
+        }
+    }
+
+    println!("x after: {x:?}");
+
+    let mut y: Option<i32> = Some(5);
+
+    println!("y before: {y:?}");
+
+    while let Some(n) = y {
+        y = if n > 0 { Some(n - 1) } else { break }
+    }
+
+    println!("y after: {y:?}");
+    println!()
+}
+
 fn main() {
     if_else_no_parens();
     if_else_expressions();
@@ -412,4 +533,11 @@ fn main() {
     match_struct();
     match_guards();
     match_binding();
+
+    if_let();
+    if_let_else();
+    if_let_enum();
+    if_let_equality();
+
+    while_let();
 }

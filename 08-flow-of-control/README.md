@@ -180,14 +180,82 @@
   let x: Option<i32> = 5;
 
   match x {
-    Some(n) => println!("we've got something!"),
+    Some(..) => println!("we've got something!"),
     _ => {}
   }
 
   // vs
 
-  if let Some(n) = x {
+  if let Some(..) = x {
     println!("we've got something!")
+  }
+  ```
+
+- one can branch using `else` if need be:
+
+  ```rust
+  let x: Option<i32> = None;
+
+  if let Some(..) = x {
+    println!("do something with x")
+  } else {
+    println!("no x available")
+  }
+  ```
+
+  or even with other conditions:
+
+  ```rust
+  let x: Option<i32> = None;
+  let y: Option<char> = Some('m');
+
+  if let Some(..) = x {
+    println!("do something with x")
+  } else if let Some(..) = y {
+    println!("do something with y")
+  }
+  ```
+
+- `if let` allows for matching on non-parameterised enums without having to
+  implement `PartialEq` on the enum, i.e.:
+
+  ```rust
+  enum Foo {
+    A
+  }
+
+  let a = Foo::A;
+
+  // this will fail to compile until we implement PartialEq on Foo:
+  if a == Foo::A {
+    println!("equal")
+  }
+
+  // this compiles without the implementation:
+  if let Foo::A = a {
+    println1("equal")
+  }
+  ```
+
+### `while let`
+
+- `while let` uses the same syntax as `if let` to desugar simple `match` blocks
+  inside of `while` blocks:
+
+  ```rust
+  let mut x: Option<i32> = 5;
+
+  loop {
+    while x {
+      Some(n) if x > 0 => *n -= 1,
+      _ => break;
+    }
+  }
+
+  // vs
+
+  while let Some(n) = x {
+    x = if n > 0 { Some(n - 1) } else { break }
   }
   ```
 
@@ -232,5 +300,19 @@
   match y {
     n @ 'a'..='z' => println!("y is lowercase"),
     _ => println!("y is not lowercase"),
+  }
+  ```
+
+- an _irrefutable pattern_ is a pattern that will always be true, e.g.:
+
+  ```rust
+  enum Foo {
+    A
+  }
+
+  let a = Foo::A;
+
+  if let Foo::A = a {
+    println!("this is an irrefutable pattern; it'll always be true!")
   }
   ```
