@@ -89,3 +89,6 @@
 
 - `std::mem::drop` requires values to be passed as `T` - i.e. not by reference /
   borrow
+- `std::mem::move` allows one to manually move ownership of values
+- `Vec.contains` is similar to Javascript's `Array.indexOf`, except returning a
+  boolean directly without further evaluation. It's more akin to Python's `x is in xs` syntax

@@ -173,6 +173,24 @@ fn closure_capture_by_value() {
 
     // may not be executed again - x is now invalid
     //drop_x();
+
+    println!();
+}
+
+fn closure_move() {
+    let x = Box::new(5);
+    let move_x = move || println!("x is moved: {x}");
+
+    move_x();
+
+    println!("x is no longer valid");
+    println!();
+
+    let xs = vec![1, 2, 3];
+    let contains = |needle| xs.contains(needle);
+
+    println!("xs contains 2: {}", contains(&2));
+    println!("xs contains 4: {}", contains(&4));
 }
 
 fn main() {
@@ -183,4 +201,5 @@ fn main() {
     closure_capture_by_mutable_ref();
     closure_mut_ref_borrowing();
     closure_capture_by_value();
+    closure_move();
 }
