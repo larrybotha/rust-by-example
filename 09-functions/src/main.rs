@@ -1,4 +1,9 @@
+use std::any::type_name;
 use std::mem;
+
+fn type_of<T>(_: T) -> &'static str {
+    type_name::<T>()
+}
 
 fn associated_functions_and_methods() {
     #[derive(Debug)]
@@ -116,6 +121,20 @@ fn consumption_as_destruction() {
     println!();
 }
 
+fn closure_optional_type_annotation() {
+    let closure_inferred = |x| x * 2;
+    let closure_annotated = |x: u32| -> u32 { x * 2 };
+
+    println!(
+        "closure_inferred will be i32 from now on: {}",
+        type_of(closure_inferred(5))
+    );
+    println!(
+        "closure_annotated is always u32: {}",
+        type_of(closure_annotated(5))
+    );
+}
+
 fn closure_capture_by_reference() {
     let x = String::from("foo");
     let bar = || println!("x captured by reference: {x}");
@@ -191,15 +210,37 @@ fn closure_move() {
 
     println!("xs contains 2: {}", contains(&2));
     println!("xs contains 4: {}", contains(&4));
+    println!();
+}
+
+fn closure_as_input_fn() {
+    fn do_that_than<F>(func: F) -> i32
+    where
+        F: Fn(i32) -> i32,
+    {
+        let x = 5;
+
+        println!("x has type: {}", type_of(x));
+
+        func(x)
+    }
+
+    let my_closure = |x| x * x;
+
+    println!("my_closure: {}", do_that_than(my_closure));
+    println!();
 }
 
 fn main() {
     associated_functions_and_methods();
     consumption_as_destruction();
 
+    closure_optional_type_annotation();
     closure_capture_by_reference();
     closure_capture_by_mutable_ref();
     closure_mut_ref_borrowing();
     closure_capture_by_value();
     closure_move();
+
+    closure_as_input_fn();
 }

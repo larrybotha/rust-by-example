@@ -2,6 +2,7 @@
 
 - https://doc.rust-lang.org/stable/rust-by-example/fn.html
 - https://doc.rust-lang.org/stable/book/ch03-03-how-functions-work.html
+- https://doc.rust-lang.org/stable/book/ch13-00-functional-features.html
 
 ## Takeaways
 
@@ -75,6 +76,33 @@
 - if a value inside the closure is captured by value, and is not `Copy`, then the
   value will be moved, otherwise not
 
+#### Closures as input parameters
+
+- closures by themselves may be optionally typed
+- as arguments to other functions, Rust requires that closures be annotated,
+  using one of three options:
+  - `Fn` - a closure that captures values by reference, i.e. `&T`. Mutable
+    references, and values passed in by value are not allowed
+  - `FnMut` - a closure that captures values by mutable reference, by
+    mutable reference, i.e. `&mut T`
+  - `FnOnce` - a closure that captures values by value. Because borrowed or
+    mutably borrowed values can be operated on in the same way that a value
+    passed in by value can, the resulting type of capture is defined by how
+    the closure is used
+- these annotated closure capture values in the least restrictive manner for
+  their type, with the compiler determining at compile-time what type the
+  captured values will be
+- defining a type signature for an input function of type `Fn` can be done as
+  follows:
+
+  ```rust
+  fn my_func<F>(f: F) -> ()
+    where F: Fn(i32) -> ()
+  {
+    f(5)
+  }
+  ```
+
 ### Additional
 
 - values can be manually cleaned up from memory using `std::mem::drop`:
@@ -92,3 +120,18 @@
 - `std::mem::move` allows one to manually move ownership of values
 - `Vec.contains` is similar to Javascript's `Array.indexOf`, except returning a
   boolean directly without further evaluation. It's more akin to Python's `x is in xs` syntax
+- `std::any::type_name` can be used to get the type from a value:
+
+  ```rust
+  fn type_of<T>(_: T) -> &'static str {
+    std::any::type_name::<T>()
+  }
+  ```
+
+- the `where` syntax is used to describe generic parameters:
+
+  ```rust
+  let my_func<T>(value: T) -> i32 where T: i32 {
+    // ...
+  }
+  ```
