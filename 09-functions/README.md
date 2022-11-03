@@ -103,6 +103,25 @@
   }
   ```
 
+- `Fn` is the most restrictive, and expects a captured value to be immutably
+  borrowed
+- `FnMut` expects a captured value to be mutably borrowed. It requires
+  annotation where it is used as an input parameter:
+
+  ```rust
+  fn apply<F>(mut f: F) where F: FnMut() {
+  f();
+  }
+
+  let mut x = 5;
+  let my_func = || {
+    *x += 1;
+  }
+  ```
+
+- `FnOnce` expects is the most permissive, but is required when a value must be
+  captured by value, e.g. when moving / dropping
+
 ### Additional
 
 - values can be manually cleaned up from memory using `std::mem::drop`:

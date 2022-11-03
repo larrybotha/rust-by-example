@@ -216,6 +216,7 @@ fn closure_move() {
 fn closure_as_input_fn() {
     fn do_that_than<F>(func: F) -> i32
     where
+        // parameter is
         F: Fn(i32) -> i32,
     {
         let x = 5;
@@ -225,9 +226,86 @@ fn closure_as_input_fn() {
         func(x)
     }
 
-    let my_closure = |x| x * x;
+    let my_closure = |x| {
+        println!("x has type: {}", type_of(x));
+        x * x
+    };
 
     println!("my_closure: {}", do_that_than(my_closure));
+    println!();
+}
+
+fn closure_as_input_value_by_reference() {
+    fn apply<F>(f: F)
+    where
+        F: Fn(),
+    {
+        f()
+    }
+
+    let x = "foo";
+    let y = 4;
+    let my_func = || {
+        println!("x (reference): {}", x);
+        println!("y (value): {}", y);
+        println!("x captured by reference");
+        println!("requires Fn, or FnOnce");
+    };
+
+    apply(my_func);
+    println!();
+}
+
+fn closure_as_input_value_by_mutable_reference() {
+    fn apply<F>(mut f: F)
+    where
+        F: FnMut(),
+    {
+        f()
+    }
+
+    let mut x = Box::new(5);
+    let my_func = || {
+        *x += 1;
+        println!("x captured as mutable reference");
+        println!("requires FnMut, or FnOnce");
+    };
+
+    apply(my_func);
+    println!();
+}
+
+fn closure_as_input_value_by_value() {
+    fn apply<F>(f: F)
+    where
+        F: FnOnce(),
+    {
+        f()
+    }
+
+    let mut x = Box::new(4);
+    let my_drop_func = || {
+        *x += 1;
+        println!("x: {x}");
+        println!("x captured by value because of mem::drop");
+        println!("requires FnOnce");
+        mem::drop(x);
+        println!("x no longer valid after drop");
+    };
+
+    apply(my_drop_func);
+    println!();
+
+    let x = Box::new(5);
+    let my_move_func = move || {
+        let z = x;
+        println!("z: {z}");
+        println!("x captured by value because of 'move'");
+        println!("requires FnOnce");
+        println!("x no longer valid after drop");
+    };
+
+    apply(my_move_func);
     println!();
 }
 
@@ -243,4 +321,7 @@ fn main() {
     closure_move();
 
     closure_as_input_fn();
+    closure_as_input_value_by_reference();
+    closure_as_input_value_by_mutable_reference();
+    closure_as_input_value_by_value();
 }
