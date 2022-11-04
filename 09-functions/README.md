@@ -109,8 +109,10 @@
   annotation where it is used as an input parameter:
 
   ```rust
-  fn apply<F>(mut f: F) where F: FnMut() {
-  f();
+  fn apply<F>(mut f: F)
+    where F: FnMut()
+  {
+    f();
   }
 
   let mut x = 5;
@@ -121,6 +123,38 @@
 
 - `FnOnce` expects is the most permissive, but is required when a value must be
   captured by value, e.g. when moving / dropping
+
+#### Type anonymity
+
+- when closures are defined, Rust implicitly creates an anonymous struct to
+  store captured variables inside, and implements one of `Fn`, `FnMut`, or
+  `FnOnce` for the closure
+
+  - the type of closure is only know when it is called, so when the closure is
+    used as an input type, it must be defined as a generic
+  - furthermore, an anonymous type `<T>` _still_ doesn't provide enough
+    information to the type signature (...what is the reason for this?)
+  - to address this, the generic value, i.e. the closure, should be indicated as
+    having to implement one of the closure traits
+
+    e.g.
+
+    ```rust
+    // f is a closure which takes no arguments, returns nothing,
+    // and must implement Fn - i.e. it captures variables by reference
+    fn apply<F>(f: F) // f is a generic, F
+      where F: Fn()   // and F must implement Fn
+    {
+      f()
+    }
+
+    let x = 4;
+    // capture 'z' into an anonymous type that must implment Fn,
+    // and bind that type to my_func
+    let my_func = || println!("{x}");
+
+    apply(my_func)
+    ```
 
 ### Additional
 
