@@ -3,6 +3,7 @@
 - https://doc.rust-lang.org/stable/rust-by-example/fn.html
 - https://doc.rust-lang.org/stable/book/ch03-03-how-functions-work.html
 - https://doc.rust-lang.org/stable/book/ch13-00-functional-features.html
+- https://huonw.github.io/blog/2015/05/finding-closure-in-rust/
 
 ## Takeaways
 
