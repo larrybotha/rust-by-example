@@ -309,6 +309,49 @@ fn closure_as_input_value_by_value() {
     println!();
 }
 
+fn closure_as_output() {
+    fn output_as_fn() -> impl Fn() {
+        let x = String::from("bar");
+        let y = String::from("foo");
+
+        move || println!("called! Ref: {}, Owned: {}", &x, y)
+    }
+
+    fn output_as_fn_mut() -> impl FnMut() {
+        let mut x = String::from("foo");
+
+        move || {
+            println!("x before: {x}");
+            x.push_str(" bar");
+            println!("x mutated: {}", x)
+        }
+    }
+
+    fn output_as_fn_once() -> impl FnOnce() {
+        let x = "foo".to_owned();
+
+        move || {
+            println!("x before: {}", x);
+            println!("dropping x from within closure...");
+            mem::drop(x);
+            println!("x has been dropped");
+        }
+    }
+
+    let as_fn = output_as_fn();
+    let mut as_fn_mut = output_as_fn_mut();
+    let as_fn_once = output_as_fn_once();
+
+    as_fn();
+    println!();
+
+    as_fn_mut();
+    println!();
+
+    as_fn_once();
+    println!();
+}
+
 fn main() {
     associated_functions_and_methods();
     consumption_as_destruction();
@@ -324,4 +367,6 @@ fn main() {
     closure_as_input_value_by_reference();
     closure_as_input_value_by_mutable_reference();
     closure_as_input_value_by_value();
+
+    closure_as_output();
 }

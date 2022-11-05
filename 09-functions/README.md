@@ -157,6 +157,38 @@
     apply(my_func)
     ```
 
+#### Input functions
+
+- as in other languages that support a functional style of programming, Rust has
+  full support for higher order functions, whether they are lambdas /
+  closures, or named functions
+- `Fn`, `FnMut`, and `FnOnce` all apply to the function accepting the other
+  function as an input parameter, regardless of whether it's a closure or not
+
+#### As output parameters
+
+- returning a closure directly from another function would mean that we're
+  returning an unknown type. To address this, we need to specify that the
+  closure is one of `Fn`, `FnMut`, or `FnOnce`. This is done by indicating
+  that the containging function _implements_ the trait;
+
+  ```rust
+  fn i_really_love_closuring() -> impl Fn() {
+    move || println!("called!")
+  }
+  ```
+
+- `move` is required to ensure that any captured values are owned by the closure
+  before it moves out of scope. This prevents dangling references inside the
+  closure after its ownership moves to where it's called
+
+#### Examples in `std`
+
+##### `Iterator::any`
+
+- `Iterator::any` is a method that structs can implement, that works in a
+  similar manner to Python's `list.any` and Javascript's `Array.some`
+
 ### Additional
 
 - values can be manually cleaned up from memory using `std::mem::drop`:
