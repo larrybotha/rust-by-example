@@ -352,6 +352,18 @@ fn closure_as_output() {
     println!();
 }
 
+fn closure_any() {
+    let xs = vec![1, 2, 3];
+    let result = xs.iter().any(|&x| x > 2);
+
+    println!("any of xs > 2?: {result}");
+
+    let result = xs.into_iter().any(|x| x > 2);
+    println!("any of xs > 2?: {result}");
+    println!("xs has been dropped thanks to .into_iter");
+    println!();
+}
+
 fn main() {
     associated_functions_and_methods();
     consumption_as_destruction();
@@ -369,4 +381,6 @@ fn main() {
     closure_as_input_value_by_value();
 
     closure_as_output();
+
+    closure_any();
 }

@@ -186,8 +186,18 @@
 
 ##### `Iterator::any`
 
-- `Iterator::any` is a method that structs can implement, that works in a
-  similar manner to Python's `list.any` and Javascript's `Array.some`
+- `Iterator::any` operates in a similar manner to Javascript's `Array.some`
+  ```rust
+  let xs = vec![1,2,3];
+  // .iter requires each value to be destructured from a ref
+  let result = xs.iter().any(|&x| x > 2);
+  // .into_iter requires no destructuring, but xs is then consumed
+  let result = xs.into_iter().any(|x| x > 2);
+  ```
+- for a struct to implement `Iterator`, it must implement `Iterator::next` at
+  the minimum
+- `.iter()` passes values by reference, while `.into_iter` moves ownership of
+  values, dropping the value that was turned into an iter
 
 ### Additional
 
