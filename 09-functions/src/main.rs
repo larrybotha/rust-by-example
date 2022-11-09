@@ -356,11 +356,22 @@ fn closure_any() {
     let xs = vec![1, 2, 3];
     let result = xs.iter().any(|&x| x > 2);
 
-    println!("any of xs > 2?: {result}");
+    println!("any of vec xs > 2?: {result}");
 
     let result = xs.into_iter().any(|x| x > 2);
-    println!("any of xs > 2?: {result}");
+    println!("any of vec xs > 2?: {result}");
     println!("xs has been dropped thanks to .into_iter");
+    println!();
+
+    let xs = [true, false, true];
+    let result = xs.iter().any(|&x| x);
+
+    println!("any of array xs == true?: {result}");
+
+    let result = xs.into_iter().any(|x| x);
+
+    println!("any of array xs == true?: {result}");
+    println!("xs is no longer valid");
     println!();
 }
 
