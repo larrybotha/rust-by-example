@@ -375,6 +375,29 @@ fn closure_any() {
     println!();
 }
 
+fn closure_find() {
+    let xs = vec![1, 2, 3];
+    // .iter() on vectors iterates over &T - a reference. To reference a
+    // reference, we need to destructure with a double ampersand
+    let first_even = xs.iter().find(|&&x| x % 2 == 0);
+
+    if let Some(n) = first_even {
+        println!("first even value in 'xs' is {}", &n);
+        println!("type of first_even is {}", type_of(n));
+    } else {
+        println!("no even numbers in 'xs'");
+    }
+
+    let first_even = xs.into_iter().find(|&x| x % 2 == 0);
+
+    if let Some(n) = first_even {
+        println!("first even value in 'xs' is {}", &n);
+        println!("type of first_even is {}", type_of(n));
+    }
+
+    println!();
+}
+
 fn main() {
     associated_functions_and_methods();
     consumption_as_destruction();
@@ -394,4 +417,5 @@ fn main() {
     closure_as_output();
 
     closure_any();
+    closure_find();
 }

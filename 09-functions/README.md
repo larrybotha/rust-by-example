@@ -199,6 +199,20 @@
 - `.iter()` passes values by reference, while `.into_iter` moves ownership of
   values, dropping the value that was turned into an iter
 
+#### Searching through iterators
+
+- `Iterator::find` is analogous to Javascript's `Array.find`, and similar to
+  Python's `next`, except that the result is `Option`:
+
+  ```rust
+  let xs = vec![1,2,3];
+  let x = xs.iter().find(|&x| x % 2 == 0);
+
+  if let Some(n) = x {
+    println!("even number exists and is {n}");
+  }
+  ```
+
 ### Additional
 
 - values can be manually cleaned up from memory using `std::mem::drop`:
