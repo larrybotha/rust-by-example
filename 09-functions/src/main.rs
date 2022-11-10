@@ -379,20 +379,65 @@ fn closure_find() {
     let xs = vec![1, 2, 3];
     // .iter() on vectors iterates over &T - a reference. To reference a
     // reference, we need to destructure with a double ampersand
-    let first_even = xs.iter().find(|&&x| x % 2 == 0);
+    let first_even = xs.iter().find(|&&x| x == 2);
 
     if let Some(n) = first_even {
-        println!("first even value in 'xs' is {}", &n);
+        println!("first even value in 'xs' is {}", n);
         println!("type of first_even is {}", type_of(n));
     } else {
         println!("no even numbers in 'xs'");
     }
 
-    let first_even = xs.into_iter().find(|&x| x % 2 == 0);
+    // .into_iter() on vectors iterators over values by value
+    let first_even = xs.into_iter().find(|&x| x == 2);
 
     if let Some(n) = first_even {
-        println!("first even value in 'xs' is {}", &n);
+        println!("first even value in 'xs' is {}", n);
         println!("type of first_even is {}", type_of(n));
+    }
+
+    println!();
+}
+
+fn closure_find_is_filter_next() {
+    let xs = vec![1, 2, 3];
+    #[allow(clippy::filter_next)]
+    let result = xs.iter().filter(|&&x| x % 2 == 0).next();
+
+    if let Some(x) = result {
+        println!("first even value of 'xs' is {x}");
+    }
+
+    println!();
+}
+
+fn closure_position() {
+    let xs = vec!["bar", "foo"];
+    let needle = "foo";
+    // we destructure `x` here because
+    let index = xs.iter().position(|&x| x == needle);
+
+    if let Some(i) = index {
+        println!("'{needle}' in 'xs' is at index {}", i);
+    }
+
+    let xs = vec!["bar".to_string(), "foo".to_string()];
+    let needle = "foo";
+    // 'x' does not need to be destructured with an ampersand here - its type
+    // is &String, so it is already a reference
+    let index = xs.iter().position(|x| x == needle);
+
+    if let Some(i) = index {
+        println!("'{needle}' in 'xs' is at index {}", i);
+    }
+
+    let xs = vec![1, 2, 3, 4, 5];
+    let needle = 5;
+    // in this example,
+    let index = xs.iter().position(|&x| x == needle);
+
+    if let Some(i) = index {
+        println!("'{needle}' in 'xs' is at index {}", i);
     }
 
     println!();
@@ -418,4 +463,6 @@ fn main() {
 
     closure_any();
     closure_find();
+    closure_find_is_filter_next();
+    closure_position();
 }

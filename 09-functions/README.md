@@ -213,6 +213,69 @@
   }
   ```
 
+- depending on whether the iterator is consumable (`.into_iter`), or uses
+  references to access values, the methods on the iterator require different
+  ways of accessing elements in the iterator
+
+  - `.iter()` yields `&T`, i.e. _yield_ in terms of generators in Python and
+    Javascript.
+
+    The `.find` predicate accepts values by mutable reference, i.e. `&mut T`.
+
+    To destructure values in the predicate, we need to account for both levels
+    of reference using a double ampersand:
+
+    ```rust
+    let xs = vec![1,2,3];
+    let result = xs.iter().find(|&&x| x == 2);
+    //               ^           ^^
+    //               |           ||
+    //               ]          /  \
+    //              [1]     [2]-    -[3]
+    //
+    // 1 - create a non-consuming iterator, yielding &i32
+    // 2 - this ampersand destructures the iterator's reference (...?)
+    // 3 - this ampersand destructures the predicate's reference (...?)
+    ```
+
+    See the resulting type of `x` each time an ampersand is added or removed,
+    see the type signature for `Iterator::find` - the values passed to the
+    predicate are annotated as `&Self::Item`
+
+    Interestingly, the double ampersand is not needed when evaluation with
+    modulo arithmetic:
+
+    ```rust
+    let xs = vec![1,2,3];
+    let first_even = xs.iter()      .find(| &x| x % 2 == 0);
+    let also_first_even = xs.iter() .find(|&&x| x % 2 == 0);
+    ```
+
+    `Rem` appears to return `i32` regardless of whether it's operating on `&i32`
+    or `i32`
+
+  - `.into_iter()` turns a collection into a consuming iterator - values are
+    passed to our predicate by value. The predicate accepts values by mutable
+    reference, as with `.iter`, so our predicate needs to destructure with a
+    single ampersand, in the same way we do with borrowed function parameters in
+    general:
+
+    ```rust
+    let xs = vec![1,2,3];
+    let result = xs.into_iter().find(|&x| x == 2);
+    // xs is no longer valid here
+    ```
+
+- the index of a value in a collection can be retrieved using
+  `Iterator::position`:
+
+  ```rust
+  let xs = vec!["foo".to_string(), "bar".to_string()];
+  let index = xs.iter().position(|x| x == "foo");
+  ```
+
+  In this example, `x` is `&String` - it's already
+
 ### Additional
 
 - values can be manually cleaned up from memory using `std::mem::drop`:
@@ -244,4 +307,12 @@
   let my_func<T>(value: T) -> i32 where T: i32 {
     // ...
   }
+  ```
+
+- `Iterator::find` is the equivalent of first filtering, and then getting the
+  first element in the iterator:
+
+  ```rust
+  let xs = vec![1,2,3];
+  let result = xs.iter().filter(|&x| x % 2 == 0).next();
   ```
