@@ -72,3 +72,37 @@
     }
   }
   ```
+
+### The `use` declaration
+
+- `use` can allow for retrieving deeply nested items in modules, as well as
+  aliasing of items in modules:
+
+  ```rust
+  // my_mod.rs
+  mod my_mod {
+    pub mod inner {
+      pub fn public_a() {}
+      pub fn public_b() {}
+    }
+  }
+
+  // main.rs
+  use my_mod::inner:{
+    public_a,
+    public_b as aliased_b
+  };
+
+  fn main() {
+    public_a();
+    aliased_b();
+  }
+  ```
+
+### `self` and `super`
+
+- `self` within a module will reference the module that the item is defined in
+- `super` within a module will reference the parent module of the module that
+  the item is defined in
+- `crate` within a module will reference the top-level scope of the current file
+- one may also traverse using multiple `supers`, e.g. `super::super::some_item`

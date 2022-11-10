@@ -117,9 +117,85 @@ fn struct_visibility() {
 
     println!("private_instance: {:?}", private_instance);
     println!("public_instance: {public_instance:?}");
+    println!();
+}
+
+fn use_declaration() {
+    use my_mod::nested_a::{nested_indirect_access as indirect, nested_public_function};
+
+    nested_public_function();
+    println!();
+
+    indirect();
+    println!();
+}
+
+fn crate_level_function() {
+    println!("called crate::crate_level_function")
+}
+
+mod cool {
+    pub fn function() {
+        println!("called cool::function")
+    }
+}
+
+mod my {
+    fn function() {
+        println!("called my::function")
+    }
+
+    pub mod cool {
+        pub fn function() {
+            println!("called my::cool::function")
+        }
+
+        pub fn call_crate_function() {
+            println!("called my::cool::call_crate_function");
+            println!("calling create::create_level_function...");
+            crate::crate_level_function();
+        }
+
+        pub fn call_crate_module_function() {
+            println!("called my::cool::call_crate_function");
+            println!("calling crate::cool::function...");
+            crate::cool::function();
+        }
+
+        pub fn call_parent_function() {
+            println!("called my::cool::call_parent_function");
+            println!("calling super::function...");
+            super::function();
+        }
+
+        pub fn call_self_function() {
+            println!("called my::cool::call_self_function");
+            println!("calling self::function...");
+            self::function();
+            println!();
+            println!("calling function, too...");
+            function();
+        }
+    }
+}
+
+fn self_and_super() {
+    my::cool::call_crate_function();
+    println!();
+
+    my::cool::call_crate_module_function();
+    println!();
+
+    my::cool::call_parent_function();
+    println!();
+
+    my::cool::call_self_function();
+    println!();
 }
 
 fn main() {
     visibility();
     struct_visibility();
+    use_declaration();
+    self_and_super();
 }
