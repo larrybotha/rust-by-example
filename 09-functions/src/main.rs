@@ -465,6 +465,38 @@ fn higher_order_functions() {
     println!();
 }
 
+fn diverge_with_continue() {
+    let max = 10;
+    let mut sum: i32 = 0;
+
+    for x in 0.. {
+        let value = match x % 2 == 0 {
+            true => x,
+            // `continue` is not i32, but because this is 'empty', i.e. !,
+            // this is valid Rust - ! will be cast to i32 in order to
+            // allow the loop to continue
+            false => continue,
+        };
+
+        sum += value;
+
+        if sum >= max {
+            break;
+        }
+    }
+
+    println!("sum: {sum}");
+    println!();
+}
+
+fn diverge_using_panic() {
+    fn my_panic() -> ! {
+        panic!("Oh noes! I never return")
+    }
+
+    my_panic();
+}
+
 fn main() {
     associated_functions_and_methods();
     consumption_as_destruction();
@@ -489,4 +521,7 @@ fn main() {
     closure_position();
 
     higher_order_functions();
+
+    diverge_with_continue();
+    diverge_using_panic();
 }

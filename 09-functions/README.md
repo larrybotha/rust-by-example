@@ -284,6 +284,37 @@
   functions in the same way that Javascript's array methods accept, with the
   restrictions imposed by the `Fn`, `FnMut`, and `FnOnce` traits
 
+#### Diverging functions
+
+- `!` is the type for the empty type
+- the empty type is different to `()` - unit has exactly one possible value,
+  while `!` is an empty set. Because of this, it can never be instantiated
+- the return type of `loop {}` is by default `!` (empty), as is `exit()`
+- `!` can be cast to any other type, which makes it useful in situations where a
+  specific type is required, e.g. when looping through a collection, and
+  ignoring some values:
+
+  ```rust
+  let max = 10;
+  let sum = 0;
+
+  for x in 0.. {
+    let value = match x % 2 == 0 {
+      true => x,
+      // 'continue' doesn't return a value, i.e. is ! / empty, and is
+      // therefore _note_ i32
+      // Instead, ! is coerced to i32, to allow the loop to continue
+      false => continue
+    }
+  }
+
+  sum += value;
+
+  if sum >= max {
+    break;
+  }
+  ```
+
 ### Additional
 
 - values can be manually cleaned up from memory using `std::mem::drop`:
