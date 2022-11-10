@@ -64,7 +64,7 @@ mod my_mod {
     }
 }
 
-fn main() {
+fn visibility() {
     my_mod::public_function();
     println!();
 
@@ -85,4 +85,41 @@ fn main() {
 
     my_mod::nested_b::nested_a_crate_access();
     println!();
+}
+
+fn struct_visibility() {
+    mod struct_mod {
+        #[allow(dead_code)]
+        #[derive(Debug)]
+        pub struct PrivateFieldsStruct<T> {
+            // this field is never directly accessible outside of the
+            // struct_mod module
+            contents: T,
+        }
+
+        impl<T> PrivateFieldsStruct<T> {
+            // the method needs to be made explicitly public, too
+            pub fn new(contents: T) -> PrivateFieldsStruct<T> {
+                PrivateFieldsStruct { contents }
+            }
+        }
+
+        #[derive(Debug)]
+        pub struct PublicFieldsStruct {
+            pub contents: Vec<i32>,
+        }
+    }
+
+    let private_instance = struct_mod::PrivateFieldsStruct::new(vec![1, 2, 3]);
+    let public_instance = struct_mod::PublicFieldsStruct {
+        contents: vec![1, 2, 3],
+    };
+
+    println!("private_instance: {:?}", private_instance);
+    println!("public_instance: {public_instance:?}");
+}
+
+fn main() {
+    visibility();
+    struct_visibility();
 }
