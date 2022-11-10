@@ -274,7 +274,15 @@
   let index = xs.iter().position(|x| x == "foo");
   ```
 
-  In this example, `x` is `&String` - it's already
+  In this example, `x` is `&String` - it's already a reference, so no need to
+  destructure the value to a type the function signature defines
+
+#### Higher order functions
+
+- Rust has a similar syntax to Javascript's declarative style when mapping,
+  filtering, etc. over arrays. The methods on `.iter` accept higher order
+  functions in the same way that Javascript's array methods accept, with the
+  restrictions imposed by the `Fn`, `FnMut`, and `FnOnce` traits
 
 ### Additional
 

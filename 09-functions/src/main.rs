@@ -414,7 +414,7 @@ fn closure_find_is_filter_next() {
 fn closure_position() {
     let xs = vec!["bar", "foo"];
     let needle = "foo";
-    // we destructure `x` here because
+    // we destructure `x` here so that the type of x matches how we're using it
     let index = xs.iter().position(|&x| x == needle);
 
     if let Some(i) = index {
@@ -443,6 +443,28 @@ fn closure_position() {
     println!();
 }
 
+fn higher_order_functions() {
+    fn square(x: i32) -> i32 {
+        x * x
+    }
+
+    fn is_lte(upper: i32) -> impl FnMut(&i32) -> bool {
+        move |x| x <= &upper
+    }
+
+    let upper = 10;
+    let xs: Vec<i32> = (0..)
+        .into_iter()
+        .map(square)
+        // the predicate must implement FnMut
+        .take_while(is_lte(upper))
+        .collect();
+    let sum: i32 = xs.iter().sum();
+
+    println!("xs: {xs:?} => {sum}");
+    println!();
+}
+
 fn main() {
     associated_functions_and_methods();
     consumption_as_destruction();
@@ -465,4 +487,6 @@ fn main() {
     closure_find();
     closure_find_is_filter_next();
     closure_position();
+
+    higher_order_functions();
 }
