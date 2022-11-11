@@ -106,3 +106,25 @@
   the item is defined in
 - `crate` within a module will reference the top-level scope of the current file
 - one may also traverse using multiple `supers`, e.g. `super::super::some_item`
+
+### File heirarchy
+
+Given the following file structure:
+
+```bash
+.
+├── a
+│   ├── a_a.rs
+│   └── a_b.rs
+├── a.rs
+└── b.rs
+```
+
+- `a.rs` could:
+  - define public items
+  - import items from folder `a` using `mod [filename]`
+  - export items imported from folder `a` using `pub mod [filename]`
+- `b.rs` could:
+  - use modules from folder a using `crate::a::[filename]`, _if_ a.rs exports
+    the module
+-
