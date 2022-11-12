@@ -12,7 +12,8 @@ Learning and annotations from the [Rust By Example book](https://doc.rust-lang.o
 - [Types](./05-types)
 - [Conversion](./06-conversion)
 - [Expressions](./07-expressions)
-- [Flow Control](./08-flow-of-control)
+- [Flow of Control](./08-flow-of-control)
+- [Functions](./09-functions)
 
 ## Links and resources
 
