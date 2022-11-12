@@ -15,6 +15,7 @@ Learning and annotations from the [Rust By Example book](https://doc.rust-lang.o
 - [Flow of Control](./08-flow-of-control)
 - [Functions](./09-functions)
 - [Modules](./10-modules)
+- [Crates](./11-crates)
 
 ## Links and resources
 
