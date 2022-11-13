@@ -16,6 +16,7 @@ Learning and annotations from the [Rust By Example book](https://doc.rust-lang.o
 - [Functions](./09-functions)
 - [Modules](./10-modules)
 - [Crates](./11-crates)
+- [Cargo](./12-cargo)
 
 ## Links and resources
 
