@@ -2,6 +2,7 @@
 
 - https://doc.rust-lang.org/stable/rust-by-example/cargo.html
 - https://doc.rust-lang.org/cargo/
+- https://doc.rust-lang.org/book/ch11-00-testing.html
 
 ## Takeaways
 
@@ -27,3 +28,19 @@
 
 - cargo allows for multiple binaries in a single project, by placing additional
   binaries into a `bin` folder, and referencing them explicitly when compiling
+
+## Testing
+
+- `cargo` supports unit and integration tests out of the box
+- unit tests are written in the same files as the modules they test
+- integration tests are placed in a `tests/` folder
+- tests are run using `cargo test`
+
+  - similarly to Jest, a specific test can be run given the test's name:
+
+    ```shell
+    $ cargo test test_foo
+    ```
+
+- cargo runs tests in parallel
+- the `#[test]` macro turns a function into a unit test
