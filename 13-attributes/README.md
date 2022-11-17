@@ -61,3 +61,12 @@
 
 - the attribute variant results in conditional compilation of code, while the
   macro results in run-time evaluation of code
+
+### Additional
+
+- `target_os` is a condition that is provided implicitly by `rustc`
+- custom conditionals can be used by providing them at compile-time to `rustc`
+
+  ```shell
+  $ rustc --cfg some_condition custom.rs && ./custom
+  ```
