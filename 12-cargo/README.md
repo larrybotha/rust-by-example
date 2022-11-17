@@ -44,3 +44,12 @@
 
 - cargo runs tests in parallel
 - the `#[test]` macro turns a function into a unit test
+
+## Build Scripts
+
+- for builds that require additional work, such as compiling other code, cargo
+  can run a build script
+- there are two ways to allow cargo to run a build script:
+  - add a `[package]build = my_file.rs` entry to `Cargo.toml`
+  - add a `build.rs` in the project directory
+- if a build script exists, it will be run before the project is built
