@@ -47,7 +47,34 @@ fn generic_functions() {
     println!();
 }
 
+fn generic_implementation() {
+    #[derive(Debug)]
+    struct GenStruct<T> {
+        val: T,
+    }
+
+    impl GenStruct<i32> {
+        fn value(self) -> i32 {
+            self.val
+        }
+    }
+
+    impl<T> GenStruct<T> {
+        fn value(self) -> T {
+            self.val
+        }
+    }
+
+    let x = GenStruct::<i32>(5);
+    let y = GenStruct("foo");
+
+    println!("x: {:?}", x.value);
+    println!("y: {:?}", y.value);
+}
+
 fn main() {
     generic_structs();
     generic_functions();
+
+    generic_implementation();
 }

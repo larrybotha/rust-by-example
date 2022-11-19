@@ -29,3 +29,15 @@
   generic(my_gen_value); // implicitly specified
   generic::<i8>(GenStruct(4)); // explicitly specified
   ```
+
+## Implementation
+
+- implementations for generic structs can be generic, or concrete:
+
+  ```rust
+  struct GenStruct<T>(T);
+
+  impl GenStruct<i32> { ... }
+
+  impl<T> GenStruct<T> { ... }
+  ```
