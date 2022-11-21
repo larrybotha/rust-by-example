@@ -53,23 +53,20 @@ fn generic_implementation() {
         val: T,
     }
 
-    impl GenStruct<i32> {
-        fn value(self) -> i32 {
-            self.val
-        }
-    }
-
     impl<T> GenStruct<T> {
         fn value(self) -> T {
             self.val
         }
     }
 
-    let x = GenStruct::<i32>(5);
-    let y = GenStruct("foo");
+    let x = GenStruct::<i8> { val: 5 };
+    let y = GenStruct { val: 5i16 };
+    let z = GenStruct { val: "foo" };
 
-    println!("x: {:?}", x.value);
-    println!("y: {:?}", y.value);
+    println!("x: {:?}", type_of(x.value()));
+    println!("y: {:?}", type_of(y.value()));
+    println!("z: {:?}", type_of(z.value()));
+    println!();
 }
 
 fn main() {

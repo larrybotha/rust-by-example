@@ -32,12 +32,17 @@
 
 ## Implementation
 
-- implementations for generic structs can be generic, or concrete:
+- implementations for generic structs require a similar `<T>` syntax:
 
   ```rust
   struct GenStruct<T>(T);
 
-  impl GenStruct<i32> { ... }
-
   impl<T> GenStruct<T> { ... }
   ```
+
+## Additional
+
+- types can be cast using:
+  - turbofish syntax: `SomeGeneric::<u8> { ... }`
+  - `as`: `SomeGeneric { value: 5 as i32 }`
+  - appending the type: `SomeGeneric { value: 5i32 }`
