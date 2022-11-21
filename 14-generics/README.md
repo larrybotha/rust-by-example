@@ -40,6 +40,22 @@
   impl<T> GenStruct<T> { ... }
   ```
 
+## Traits
+
+- traits can be generic, with the generics defined _after_ the name of the
+  trait:
+
+  ```rust
+  trait MyTrait<T> {
+    fn method(self, _T);
+  }
+
+  // implement MyTrait generically for any caller U
+  impl<T, U> MyTrait<T> for U {
+    ...
+  }
+  ```
+
 ## Additional
 
 - types can be cast using:

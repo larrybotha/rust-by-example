@@ -69,9 +69,31 @@ fn generic_implementation() {
     println!();
 }
 
+fn generic_traits() {
+    struct Empty;
+    struct Null;
+
+    // A trait that is generic over T
+    trait DoubleDrop<T> {
+        fn drop(self, _: T);
+    }
+
+    // implement the DoubleDrop trait, given a generic caller U
+    impl<T, U> DoubleDrop<T> for U {
+        fn drop(self, _: T) {}
+    }
+
+    let x = Empty;
+    let null = Null;
+
+    x.drop(null);
+    println!();
+}
+
 fn main() {
     generic_structs();
     generic_functions();
 
     generic_implementation();
+    generic_traits();
 }
