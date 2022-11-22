@@ -14,7 +14,7 @@
 
 - any type that is not generic is considered _concrete_
 
-## Functions
+### Functions
 
 - generic function parameters may be specificed implicitly, by the type passed
   in, or explicitly when called:
@@ -30,7 +30,7 @@
   generic::<i8>(GenStruct(4)); // explicitly specified
   ```
 
-## Implementation
+### Implementation
 
 - implementations for generic structs require a similar `<T>` syntax:
 
@@ -40,7 +40,7 @@
   impl<T> GenStruct<T> { ... }
   ```
 
-## Traits
+### Traits
 
 - traits can be generic, with the generics defined _after_ the name of the
   trait:
@@ -55,6 +55,28 @@
     ...
   }
   ```
+
+### Bounds
+
+- generic type parameters may define _bounds_ - traits that the type must
+  implement for it to be passed in
+
+  ```rust
+  fn do_the_print<T: Display>(value: T) {
+  //                   [1]
+  // 1 - a bound on the generic type T
+    println!("{value}");
+  }
+  ```
+
+- structs may also define bounds:
+
+  ```rust
+  struct MyType<T: Display>;
+  ```
+
+- generic values passed into functions that have a defined bound may safely
+  access any methods defined on the trait
 
 ## Additional
 

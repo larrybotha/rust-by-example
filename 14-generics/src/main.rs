@@ -1,4 +1,6 @@
 use std::any::type_name;
+use std::f32::consts::PI;
+use std::fmt::Display;
 
 fn type_of<T>(_: T) -> &'static str {
     type_name::<T>()
@@ -90,10 +92,89 @@ fn generic_traits() {
     println!();
 }
 
+fn generic_bounds() {
+    struct BoundedType<T: Display> {
+        //                  [1]
+        // 1 - T has the bound 'Display'
+        value: T,
+    }
+
+    fn do_the_print<T: Display>(value: T) {
+        println!("{}", type_of(value))
+    }
+
+    let x = BoundedType { value: "foo" };
+    let y = 2_i16;
+
+    do_the_print(x.value);
+    do_the_print(y);
+
+    println!();
+}
+
+fn generic_bounds_methods() {
+    trait HasArea {
+        fn area(&self) -> f32;
+    }
+
+    struct Circle {
+        radius: i32,
+    }
+
+    impl Display for Circle {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            write!(f, "Circle {{{}}}", self.radius)
+        }
+    }
+
+    impl HasArea for Circle {
+        fn area(&self) -> f32 {
+            PI * self.radius.pow(2) as f32
+        }
+    }
+
+    struct Rectangle {
+        width: i32,
+        breadth: i32,
+    }
+
+    impl Display for Rectangle {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            write!(f, "Rectangle {{{} x {}}}", self.width, self.breadth)
+        }
+    }
+
+    impl HasArea for Rectangle {
+        fn area(&self) -> f32 {
+            (self.breadth * self.width) as f32
+        }
+    }
+
+    fn print_area<T: HasArea + Display>(shape: &T) {
+        // we can use .area here because the bound HasArea means the type
+        // is guaranteed to have the method
+        let area = shape.area();
+
+        println!("{shape} has area {area}")
+    }
+
+    let rectangle = Rectangle {
+        breadth: 6,
+        width: 5,
+    };
+    let circle = Circle { radius: 5 };
+
+    print_area(&rectangle);
+    print_area(&circle);
+    println!();
+}
+
 fn main() {
     generic_structs();
     generic_functions();
 
     generic_implementation();
     generic_traits();
+    generic_bounds();
+    generic_bounds_methods();
 }
