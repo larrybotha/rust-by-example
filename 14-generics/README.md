@@ -1,6 +1,8 @@
 # Generics
 
 - https://doc.rust-lang.org/stable/rust-by-example/generics.html
+- https://doc.rust-lang.org/std/cmp/trait.Eq.html
+- https://doc.rust-lang.org/std/marker/trait.Copy.html
 
 ## Takeaways
 
@@ -77,6 +79,15 @@
 
 - generic values passed into functions that have a defined bound may safely
   access any methods defined on the trait
+- traits that don't include any functionality can still be used as bounds:
+
+  ```rust
+  trait Foo {}
+
+  fn do_the_foo<T: Foo>(value: T) {
+    // ...
+  }
+  ```
 
 ## Additional
 
@@ -84,3 +95,4 @@
   - turbofish syntax: `SomeGeneric::<u8> { ... }`
   - `as`: `SomeGeneric { value: 5 as i32 }`
   - appending the type: `SomeGeneric { value: 5i32 }`
+- `Eq` and `Copy` are traits that don't implement any functionality

@@ -169,6 +169,30 @@ fn generic_bounds_methods() {
     println!();
 }
 
+fn generic_bounds_empty_traits() {
+    struct NotFoo {}
+
+    trait EmptyTrait {}
+
+    #[derive(Debug)]
+    struct Foo {}
+
+    impl EmptyTrait for Foo {}
+
+    fn my_bound<T: EmptyTrait + std::fmt::Debug>(value: &T) {
+        println!("Bounded! Value implements EmptyTrait: {:?}", value)
+    }
+
+    let x = Foo {};
+    let _y = NotFoo {};
+
+    my_bound(&x);
+
+    // _y does not implement EmptyTrait
+    //my_bound(&_y);
+    println!()
+}
+
 fn main() {
     generic_structs();
     generic_functions();
@@ -177,4 +201,5 @@ fn main() {
     generic_traits();
     generic_bounds();
     generic_bounds_methods();
+    generic_bounds_empty_traits();
 }
