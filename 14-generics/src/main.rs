@@ -193,6 +193,86 @@ fn generic_bounds_empty_traits() {
     println!()
 }
 
+fn where_clause_for_readability() {
+    trait TraitA {}
+    trait TraitB {}
+    trait TraitC {}
+    trait TraitD {}
+
+    #[derive(Debug)]
+    struct X;
+
+    impl TraitA for X {}
+    impl TraitB for X {}
+
+    #[derive(Debug)]
+    struct Y;
+
+    impl TraitC for Y {}
+    impl TraitD for Y {}
+
+    fn foo<T: TraitA + TraitB + std::fmt::Debug, U: TraitC + TraitD + std::fmt::Debug>(
+        x: &T,
+        y: &U,
+    ) {
+        println!("{x:?} {y:?}")
+    }
+
+    // bar has the same type signature, but the `where` clause makes it
+    // easier to read
+    fn bar<T, U>(x: &T, y: &U)
+    where
+        T: TraitA + TraitB + std::fmt::Debug,
+        U: TraitC + TraitD + std::fmt::Debug,
+    {
+        println!("{x:?} {y:?}")
+    }
+
+    let x = X;
+    let y = Y;
+
+    foo(&x, &y);
+    bar(&x, &y);
+
+    println!()
+}
+
+fn where_clause_when_required() {
+    trait Debuggable {
+        fn debug_in_option(self);
+        fn get_debug_string(self) -> String;
+    }
+
+    impl<T> Debuggable for T
+    // we can't set this bound where T is first mentioned, because
+    // we want the bound specified for Option<T>, as that is what
+    // we're printing
+    where
+        Option<T>: std::fmt::Debug,
+    {
+        fn debug_in_option(self) {
+            println!("{:?}", Some(self))
+        }
+
+        fn get_debug_string(self) -> String {
+            // Without the bound on Option, we wouldn't be able to use
+            // Some(self) here
+            // Furthermore, to use `self`, we'd need a bound on T, too
+            let result = format!("{:?}", Some(self));
+
+            result
+        }
+    }
+
+    let xs = vec![1, 2, 3];
+    let ys = vec![1, 2, 3];
+
+    xs.debug_in_option();
+
+    println!("{}", ys.get_debug_string());
+    println!();
+}
+
 fn main() {
     generic_structs();
     generic_functions();
@@ -202,4 +282,7 @@ fn main() {
     generic_bounds();
     generic_bounds_methods();
     generic_bounds_empty_traits();
+
+    where_clause_for_readability();
+    where_clause_when_required();
 }

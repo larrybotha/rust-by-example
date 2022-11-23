@@ -89,6 +89,37 @@
   }
   ```
 
+- multiple bounds can be defined by separating the traits with `+`:
+
+  ```rust
+  fn my_func<T: TraitA + TraitB, U: TraitC>(...)
+  ```
+
+### `where` clauses
+
+- as an alternative to defining bounds for input parameters where the type is
+  first mentioned, one can define bounds directly before the item's body using
+  `where`
+
+  ```rust
+  fn do_the_debug<T>(value: T) where T: Debug {
+    println!({value:?})
+  }
+  ```
+
+- `where` clauses are useful when:
+
+  - defining bounds upfront is noisy
+  - defining a bound where the type is first mentioned is not possible, e.g.:
+
+    ```rust
+    impl<T> MyTrait for T where Option<T>: Debug {
+      fn do_the_option_debug(self) {
+        println!("{:?}", Some(self))
+      }
+    }
+    ```
+
 ## Additional
 
 - types can be cast using:
