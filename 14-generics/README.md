@@ -120,6 +120,29 @@
     }
     ```
 
+### `newtype` idiom
+
+- the `newtype` idiom ensures that at compile time the correct types of values
+  are provided
+
+  e.g. for two tuple structs with the same type of value, a type signature
+  expecting one type will reject values of the other type:
+
+  ```rust
+  struct TypeA(i32);
+  struct TypeB(i32);
+
+  fn foo(value: &TypeA) {
+    ...
+  }
+
+  let a = TypeA(5);
+  let b = TypeB(5);
+
+  foo(a); // valid
+  // foo(b); // invalid
+  ```
+
 ## Additional
 
 - types can be cast using:
