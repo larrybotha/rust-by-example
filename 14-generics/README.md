@@ -3,6 +3,8 @@
 - https://doc.rust-lang.org/stable/rust-by-example/generics.html
 - https://doc.rust-lang.org/std/cmp/trait.Eq.html
 - https://doc.rust-lang.org/std/marker/trait.Copy.html
+- https://doc.rust-lang.org/stable/rust-by-example/generics/assoc_items.html
+- https://doc.rust-lang.org/reference/items.html
 
 ## Takeaways
 
@@ -143,6 +145,13 @@
   // foo(b); // invalid
   ```
 
+### Associated items
+
+- this refers to rules pertaining to [items](https://doc.rust-lang.org/reference/items.html)
+- associated items are an extension of _trait generics_, and allow for traits to
+  define new types internally
+- one such type is an _associated type_
+
 ## Additional
 
 - types can be cast using:
@@ -150,3 +159,5 @@
   - `as`: `SomeGeneric { value: 5 as i32 }`
   - appending the type: `SomeGeneric { value: 5i32 }`
 - `Eq` and `Copy` are traits that don't implement any functionality
+- an _item_ is a component of a crate, which could be a module, function, type,
+  enum, `use` declaration, etc.

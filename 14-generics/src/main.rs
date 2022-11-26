@@ -273,6 +273,107 @@ fn where_clause_when_required() {
     println!();
 }
 
+fn generic_associated_types_before() {
+    #[derive(Debug)]
+    struct Container(i32, i32);
+
+    // A trait with 2 generic types
+    trait Contains<A, B> {
+        // determine if an instance that implements this traiit
+        // contains 2 values
+        fn contains(&self, _: &A, _: &B) -> bool;
+        // get the first value from the instance
+        // - no need for A or B
+        fn first(&self) -> i32;
+        // get the last value from the instance
+        // - no need for A or B
+        fn last(&self) -> i32;
+    }
+
+    impl Contains<i32, i32> for Container {
+        fn contains(&self, x: &i32, y: &i32) -> bool {
+            &self.0 == x && &self.1 == y
+        }
+
+        fn first(&self) -> i32 {
+            self.0
+        }
+
+        fn last(&self) -> i32 {
+            self.1
+        }
+    }
+
+    // A, B, and C need to be specified
+    fn difference<A, B, C>(container: &C) -> i32
+    where
+        C: Contains<A, B>,
+    {
+        container.last() - container.first()
+    }
+
+    let x = Container(4, 2);
+
+    println!("x contains 4 and 2: {:?}", x.contains(&4, &2));
+    println!("x contains 5 and 2: {:?}", x.contains(&5, &2));
+    println!("x difference: {:?}", difference(&x));
+    println!();
+}
+
+fn generic_associated_types_after() {
+    #[derive(Debug)]
+    struct Container(i32, i32);
+
+    trait Contains {
+        // 'Contains' is a trait with 2 associated types,
+        // i.e. output types
+        type A;
+        type B;
+
+        // use Self::A to reference associated type
+        fn contains(&self, _: &Self::A, _: &Self::B) -> bool;
+
+        fn first(&self) -> i32;
+
+        fn last(&self) -> i32;
+    }
+
+    impl Contains for Container {
+        // 'Container' implements 'Contains', and is thus the input type.
+        // 'Container' is defined with 2 i32 values, which are thus 'Contains's
+        // output types
+        type A = i32;
+        type B = i32;
+
+        // we can either use the type, or Self::[associated_type] to specify
+        // the output type
+        fn contains(&self, x: &Self::A, y: &i32) -> bool {
+            &self.0 == x && &self.1 == y
+        }
+
+        fn first(&self) -> i32 {
+            self.0
+        }
+
+        fn last(&self) -> i32 {
+            self.1
+        }
+    }
+
+    // because 'Contains' now uses associated types, and 'Container' needs to
+    // implmeent the types, we no longer need to specify all the types
+    fn difference<C: Contains>(container: &C) -> i32 {
+        container.last() - container.first()
+    }
+
+    let x = Container(4, 2);
+
+    println!("x contains 4 and 2: {:?}", x.contains(&4, &2));
+    println!("x contains 5 and 2: {:?}", x.contains(&5, &2));
+    println!("x difference: {:?}", difference(&x));
+    println!();
+}
+
 fn main() {
     generic_structs();
     generic_functions();
@@ -285,4 +386,7 @@ fn main() {
 
     where_clause_for_readability();
     where_clause_when_required();
+
+    generic_associated_types_before();
+    generic_associated_types_after();
 }
