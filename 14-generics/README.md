@@ -5,6 +5,7 @@
 - https://doc.rust-lang.org/std/marker/trait.Copy.html
 - https://doc.rust-lang.org/stable/rust-by-example/generics/assoc_items.html
 - https://doc.rust-lang.org/reference/items.html
+- https://doc.rust-lang.org/reference/items/associated-items.html#associated-types
 
 ## Takeaways
 
@@ -151,6 +152,45 @@
 - associated items are an extension of _trait generics_, and allow for traits to
   define new types internally
 - one such type is an _associated type_
+- a trait can define an associated type - a type that is associated with
+  implementation of the trait:
+
+  ```rust
+  struct MyStruct(i32);
+
+  trait MyTrait {
+    type AssociatedType;
+  }
+
+  impl MyTrait for MyStruct {
+    type AssociatedType = i32;
+  }
+  ```
+
+  - the type that is implementing the trait is called the _input type_
+  - the associated type inside the trait is called the _output type_
+  - see [associated types](https://doc.rust-lang.org/reference/items/associated-items.html#associated-types)
+
+- associated types make specifying generic types on traits less verbose
+
+  e.g.
+
+  ```rust
+  trait GenericTrait<A, B> {
+    ...
+  }
+
+  fn my_func<T, A, B>(value: T) where T: GenericTrait<A, B> { ... }
+
+  // vs
+
+  trait GenericTrait {
+    type A;
+    type B;
+  }
+
+  fn my_func<T: GenericTrait>(value: T) { ... }
+  ```
 
 ## Additional
 
