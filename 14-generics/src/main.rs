@@ -2,6 +2,8 @@ use std::any::type_name;
 use std::f32::consts::PI;
 use std::fmt::Display;
 
+use std::marker::PhantomData;
+
 fn type_of<T>(_: T) -> &'static str {
     type_name::<T>()
 }
@@ -374,6 +376,56 @@ fn generic_associated_types_after() {
     println!();
 }
 
+fn phantom_types() {
+    #[derive(Debug, PartialEq)]
+    struct PhantomTuple<A, B>(A, PhantomData<B>);
+
+    impl<A, B> PhantomTuple<A, B> {
+        fn new(value: A, _: B) -> Self {
+            Self(value, PhantomData)
+        }
+    }
+
+    let tuple_x: PhantomTuple<char, i32> = PhantomTuple::new('A', 5);
+    let tuple_y: PhantomTuple<char, f64> = PhantomTuple::new('A', 5.0);
+
+    println!("tuple_x: {:?}", &tuple_x);
+    println!("tuple_y: {:?}", &tuple_y);
+
+    // The following comparison raises compile-time errors, because
+    // the phanatom types PhantomData<i32> and PhantomData<f64> are
+    // not comparable
+    //println!("tuple_x == tuple_y: {}", tuple_x == tuple_y);
+
+    println!();
+
+    #[derive(Debug, PartialEq)]
+    struct PhantomStruct<A, B> {
+        value: A,
+        phantom: PhantomData<B>,
+    }
+
+    impl<A, B> PhantomStruct<A, B> {
+        fn new(value: A, _: B) -> Self {
+            Self {
+                value,
+                phantom: PhantomData,
+            }
+        }
+    }
+
+    let struct_x: PhantomStruct<char, i32> = PhantomStruct::new('A', 5);
+    let struct_y: PhantomStruct<char, f64> = PhantomStruct::new('A', 5.0);
+
+    println!("struct_x: {:?}", &struct_x);
+    println!("struct_y: {:?}", &struct_y);
+
+    // As with the tuple structs, this line raises compile-time errors, too
+    //println!("struct_x == struct_y: {}", struct_x == struct_y);
+
+    println!();
+}
+
 fn main() {
     generic_structs();
     generic_functions();
@@ -389,4 +441,6 @@ fn main() {
 
     generic_associated_types_before();
     generic_associated_types_after();
+
+    phantom_types();
 }

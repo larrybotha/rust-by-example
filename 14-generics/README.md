@@ -192,6 +192,21 @@
   fn my_func<T: GenericTrait>(value: T) { ... }
   ```
 
+### Phantom type parameters
+
+- phantom types are checked only at compile-time, and are useful for
+  type-checking
+- `std::marker::PhantomData` is one of the types that can be used when defining
+  phantom types:
+
+  ```rust
+  use std::marker::PhantomData;
+
+  struct MyStruct<A> {
+    phantom: PhantomData<A>
+  }
+  ```
+
 ## Additional
 
 - types can be cast using:
