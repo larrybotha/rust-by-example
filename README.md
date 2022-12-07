@@ -18,6 +18,7 @@ Learning and annotations from the [Rust By Example book](https://doc.rust-lang.o
 - [Crates](./11-crates)
 - [Cargo](./12-cargo)
 - [Attributes](./13-attributes)
+- [Generics](./14-generics)
 
 ## Links and resources
 
