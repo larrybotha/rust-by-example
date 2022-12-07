@@ -1,8 +1,8 @@
 use std::any::type_name;
 use std::f32::consts::PI;
 use std::fmt::Display;
-
 use std::marker::PhantomData;
+use std::ops::Add;
 
 fn type_of<T>(_: T) -> &'static str {
     type_name::<T>()
@@ -426,6 +426,38 @@ fn phantom_types() {
     println!();
 }
 
+fn phantom_types_unit_clarification() {
+    // These enums are called 'void enumerations'
+    // They appear to be an old style of declaring types without values,
+    // and are analagous to unit-like structs
+    #[derive(Debug, Clone, Copy)]
+    enum Gram {}
+
+    #[derive(Debug, Clone, Copy)]
+    enum Ounce {}
+
+    #[derive(Debug, Clone, Copy)]
+    struct Weight<Unit>(f64, PhantomData<Unit>);
+
+    impl<Unit> Add for Weight<Unit> {
+        type Output = f64;
+
+        fn add(self, rhs: Self) -> Self::Output {
+            self.0 + rhs.0
+        }
+    }
+
+    let weight_in_grams: Weight<Gram> = Weight(5.0, PhantomData);
+    let weight_in_ounces: Weight<Ounce> = Weight(6.0, PhantomData);
+
+    println!("total grams: {}", weight_in_grams + weight_in_grams);
+    println!("total ounces: {}", weight_in_ounces + weight_in_ounces);
+
+    // We can't add these values - the PhantomData in the Weight definition
+    // ensures we can only add two units of the same type
+    //println!("total mixed: {}", weight_in_grams + weight_in_ounces);
+}
+
 fn main() {
     generic_structs();
     generic_functions();
@@ -443,4 +475,5 @@ fn main() {
     generic_associated_types_after();
 
     phantom_types();
+    phantom_types_unit_clarification();
 }

@@ -6,6 +6,7 @@
 - https://doc.rust-lang.org/stable/rust-by-example/generics/assoc_items.html
 - https://doc.rust-lang.org/reference/items.html
 - https://doc.rust-lang.org/reference/items/associated-items.html#associated-types
+- http://doc.rust-lang.org/1.65.0/std/marker/struct.PhantomData.html
 
 ## Takeaways
 
@@ -216,3 +217,11 @@
 - `Eq` and `Copy` are traits that don't implement any functionality
 - an _item_ is a component of a crate, which could be a module, function, type,
   enum, `use` declaration, etc.
+- void enumerations appear to be an older mechanism for defining types that hold
+  no values, but seem to have been superceded by unit-like structs:
+
+  ```rust
+  enum VoidEnumeration {}
+
+  struct UnitLikeStruct
+  ```
