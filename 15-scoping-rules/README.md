@@ -59,6 +59,32 @@
   *y += "bar";
   ```
 
+#### Partial moves
+
+- destructuring of complex values, such as tuples and structs, can be done in
+  two ways:
+
+  - by value
+  - by reference:
+
+    ```rust
+    struct Person {
+      name: String,
+      age: Box<i32>,
+    }
+
+    let sam = Person { name: String::from("sam"), age: Box::<i32>::new(42) };
+    let Person { name, ref age } = sam; // name is destructured by value
+                                        // age is destructured by reference
+    ```
+
+    This results in a partial move - `name` has been moved, but `age` has
+
+- in addition to accessing the values that have been moved out of the original
+  value, the original value, which is now partially moved, may not be referenced
+- if either of the values were stored on the stack, the move would be
+  unnecessary, as destructuring would result in copying
+
 ## Additional notes
 
 - [valgrind](https://valgrind.org/) is useful for profiling memory leaks on Linux
@@ -70,4 +96,21 @@
 
   *box_int += 5;
   *box_str += "bar";
+  ```
+
+- `ref` can be used to destructure a value _by-reference_:
+
+  ```rust
+  struct MyThing {
+    thing_a: String,
+    thing_b: String,
+  }
+
+  let thing = MyThing {
+    thing_a: String::from("foo"),
+    thing_b: String::from("bar")
+  };
+  // thing_a is destructured by-value
+  // thing_b is destructured by-reference
+  let MyThing { thing_a, ref thing_b } = thing;
   ```

@@ -93,6 +93,30 @@ fn change_of_ownership_and_mutability() {
     println!();
 }
 
+fn partial_moves() {
+    #[derive(Debug)]
+    struct Person {
+        name: String,
+        age: Box<i32>,
+    }
+
+    let person = Person {
+        name: String::from("sam"),
+        age: Box::<i32>::new(42),
+    };
+    let Person { name, ref age } = person;
+
+    // name is moved here, and then dropped
+    println!("person's name is {}", name);
+
+    // age is referenced here
+    println!("person's age is {}", age);
+
+    // we are not allowed to reference `person` here - it has been
+    // partially moved
+    //println!("person's age is {:?}", person);
+}
+
 fn main() {
     // RAII
     raii_example();
@@ -102,4 +126,5 @@ fn main() {
     copy_into();
     move_into();
     change_of_ownership_and_mutability();
+    partial_moves();
 }
