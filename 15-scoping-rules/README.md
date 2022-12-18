@@ -36,6 +36,38 @@
 
 ### Ownership and moves
 
+- variables are in charge of freeing their own resources
+- resources can have only have one owner, which prevents double-free errors
+- not all variables can own resources - e.g. references are not owned
+- ownership is moved during variable assignment or passing values into functions
+  if the value the original variable holds _is not `Copy`_ - i.e. if the value
+  does not implement `Copy`, it will be moved during assignment, otherwise it
+  will be copied
+- `let y = x` is referred to as _x is moved into y_
+  - when values are copied, one says _x is copied into y_
+- once a value is moved, the previous owner cannot be referenced - this prevents
+  dangling pointers
+
+#### Mutability
+
+- mutability of data can be changed when ownership is transferred:
+
+  ```rust
+  let x = String::from("foo"); // immutable
+  let mut y = x; // x moved into y, mutably
+
+  *y += "bar";
+  ```
+
 ## Additional notes
 
-- [valgrid](https://valgrind.org/) is useful for profiling memory leaks on Linux
+- [valgrind](https://valgrind.org/) is useful for profiling memory leaks on Linux
+- `Box`'s methods change depending on the type of value it contains:
+
+  ```rust
+  let mut box_int = Box::new(42); // has .pow, .log, etc.
+  let mut box_str = Box::new("foo".to_owned()); // has .chars, .bytes
+
+  *box_int += 5;
+  *box_str += "bar";
+  ```

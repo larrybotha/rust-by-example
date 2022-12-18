@@ -51,7 +51,55 @@ fn custom_drop() {
     println!()
 }
 
+fn copy_into() {
+    fn do_something(x: u32) {
+        println!("doing something with x: {}", x)
+    }
+
+    // stack-allocated integer
+    let x = 42u32;
+
+    do_something(x);
+
+    println!("x is still accessible: {}", x);
+    println!();
+}
+
+fn move_into() {
+    fn do_something(x: Box<u32>) {
+        println!("doing something with x: {}", x);
+        // x destroyed here via 'drop'
+    }
+
+    // create a heap-allocated integer
+    let x = Box::new(42);
+
+    do_something(x);
+
+    println!("x may not be referenced any longer");
+    println!()
+}
+
+fn change_of_ownership_and_mutability() {
+    let immutable_box = Box::<i32>::new(42);
+    let mut mutable_box = immutable_box; // by reassigning, we can make the value mutable
+
+    println!("mutable box: {}", mutable_box);
+
+    // mutate the contents of the box
+    *mutable_box *= 4;
+
+    println!("mutable box: {}", mutable_box);
+    println!();
+}
+
 fn main() {
+    // RAII
     raii_example();
     custom_drop();
+
+    // ownership
+    copy_into();
+    move_into();
+    change_of_ownership_and_mutability();
 }
