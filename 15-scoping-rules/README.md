@@ -85,6 +85,20 @@
 - if either of the values were stored on the stack, the move would be
   unnecessary, as destructuring would result in copying
 
+### Borrowing
+
+- _Rust by example_ indicates that we generally want to access data without
+  taking ownership - this is where borrowing and references come in
+- while a value is borrowed, we are guaranteed that it cannot be destroyed
+
+#### Aliasing
+
+- immutably borrowed data can be borrowed an arbitrary number of times
+- only a single mutable borrow may be used at a time, and no other references
+  may be used until the last use of the mutable borrow
+- any references created before the mutable borrow become invalid once the
+  mutable borrow has been defined
+
 ## Additional notes
 
 - [valgrind](https://valgrind.org/) is useful for profiling memory leaks on Linux
@@ -114,3 +128,9 @@
   // thing_b is destructured by-reference
   let MyThing { thing_a, ref thing_b } = thing;
   ```
+
+- a variable that is mutable may be passed through to functions with the most
+  flexibility:
+  - by value
+  - by immutable reference
+  - by mutable reference
