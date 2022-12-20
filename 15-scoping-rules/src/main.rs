@@ -319,6 +319,24 @@ fn ref_mutable_destructuring() {
     println!();
 }
 
+fn lifetime_intro() {
+    let i = 42; // lifetime for i starts
+
+    {
+        let borrow_a = &i; // lifetime for borrow_a starts
+
+        println!("borrow_a: {}", borrow_a);
+    } // borrow_a lifetime ends
+
+    {
+        let borrow_b = &i; // lifetime for borrow_b starts
+
+        println!("borrow_b: {borrow_b}");
+    } // lifetime of borrow_b ends
+
+    println!();
+} // i is destroyed - outliving its references
+
 fn main() {
     // RAII
     raii_example();
@@ -339,4 +357,7 @@ fn main() {
     ref_ampersand_equivalence();
     ref_destructuring();
     ref_mutable_destructuring();
+
+    // lifetimes
+    lifetime_intro();
 }

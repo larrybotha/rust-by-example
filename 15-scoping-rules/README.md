@@ -141,6 +141,20 @@
   *a += a; // => a == 2
   ```
 
+### Lifetimes
+
+- a variable's lifetime begins when it is created, and ends when it is destroyed
+- the borrow checker uses lifetimes to determine the validity of borrows /
+  references
+- a borrow is declared using `&` - it is valid under the condition that it is
+  destroyed before the value it is borrowing is destroyed - i.e. the borrow
+  checker will not allow for us to create a borrow that may outlive the value
+  it is borrowing
+
+#### Explicit annotation
+
+-
+
 ## Additional notes
 
 - [valgrind](https://valgrind.org/) is useful for profiling memory leaks on Linux
