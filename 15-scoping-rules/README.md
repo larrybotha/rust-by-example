@@ -99,6 +99,48 @@
 - any references created before the mutable borrow become invalid once the
   mutable borrow has been defined
 
+#### The `ref` pattern
+
+- `ref` can be used to create references to fields during `let` destructuring or
+  pattern matching
+- using `ref` during variable assignment is equivalent to using `&`:
+
+  ```rust
+  let x = 42;
+  let ref ref_x_a = x;
+  let ref_x_b = x;
+
+  println!("refs point to same value?: {}" *ref_x_a == *ref_x_b);
+  ```
+
+- fields can be destructured as immutable references:
+
+  ```rust
+  struct Thing {
+    a: i32,
+    b: i32
+  }
+
+  let thing = Thing { a: 1, b: 1 };
+  let Thing { a: ref a_ref, b: _ } = thing;
+
+  println!("a_ref is {}", a_ref);
+  ```
+
+- fields can be destructured as mutable refs:
+
+  ```rust
+  struct Thing {
+    a: i32,
+    b: i32
+  }
+
+  let mut thing = Thing {a:1, b: 1};
+  let Thing { a: ref mut a_mutable_ref, b: _ } = thing;
+
+  *a += a; // => a == 2
+  ```
+
 ## Additional notes
 
 - [valgrind](https://valgrind.org/) is useful for profiling memory leaks on Linux

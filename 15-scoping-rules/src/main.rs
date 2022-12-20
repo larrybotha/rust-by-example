@@ -257,6 +257,68 @@ fn aliasing() {
     println!()
 }
 
+#[allow(clippy::toplevel_ref_arg)]
+fn ref_ampersand_equivalence() {
+    let x = 42;
+    let ref x_ref_a = x;
+    let x_ref_b = &x;
+
+    assert_eq!(*x_ref_a, *x_ref_b);
+
+    println!("ref and & point to the same value");
+    println!();
+}
+
+fn ref_destructuring() {
+    // Copy and Clone are derivable because all fields are stack-allocated
+    #[derive(Debug, Clone, Copy)]
+    #[allow(dead_code)]
+    struct Point {
+        x: i32,
+        y: i32,
+    }
+
+    let point = Point { x: 1, y: 1 };
+
+    let x_copy = {
+        let Point {
+            // destructure x as a ref
+            x: ref ref_to_x,
+            y: _,
+        } = point;
+
+        *ref_to_x
+    };
+
+    println!("point: {point:?}");
+    println!("x_copy: {x_copy}");
+    println!()
+}
+
+fn ref_mutable_destructuring() {
+    #[derive(Debug)]
+    #[allow(dead_code)]
+    struct Point {
+        x: i32,
+        y: i32,
+    }
+
+    let mut point = Point { x: 1, y: 1 };
+
+    println!("point before: {point:?}");
+
+    let Point {
+        // create a mutable reference
+        x: ref mut mutable_x,
+        y: _,
+    } = point;
+
+    *mutable_x *= 2;
+
+    println!("point after: {point:?}");
+    println!();
+}
+
 fn main() {
     // RAII
     raii_example();
@@ -272,4 +334,9 @@ fn main() {
     borrow_and_destroy();
     mutable_borrows();
     aliasing();
+
+    // ref pattern
+    ref_ampersand_equivalence();
+    ref_destructuring();
+    ref_mutable_destructuring();
 }
