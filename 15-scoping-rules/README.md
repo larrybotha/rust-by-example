@@ -1,6 +1,7 @@
 # Scoping Rules
 
 - https://doc.rust-lang.org/stable/rust-by-example/scope.html
+- https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html#lifetime-elision
 
 ## Takeaways
 
@@ -153,7 +154,16 @@
 
 #### Explicit annotation
 
--
+- all references have lifetimes
+- there are rules which determine whether a lifetime needs to be explicit or
+  not this - _elision of lifetime parameters_ referes to this and the rules
+- for the following: `foo<'a, 'b>` - the item `foo` may not outlive either of
+  the two lifetimes `'a` or `'b`
+- lifetimes are applicable to borrows in trait implementations, function definitions,
+  and variable declarations
+- when lifetimes are ambiguous, say when a function accepts multiple borrowed
+  values, and then returns some borrowed value, we need to be explicit to
+  indicate to the compiler which lifetime is being returned
 
 ## Additional notes
 
@@ -190,3 +200,10 @@
   - by value
   - by immutable reference
   - by mutable reference
+- `str` variables are included in the resulting binary after compiling - they
+  have lifetimes that span the lifetime of the application, and thus have the
+  special `'static` lifetime:
+
+  ```rust
+  let x: &'static str = "foo";
+  ```

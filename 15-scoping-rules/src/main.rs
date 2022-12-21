@@ -128,8 +128,7 @@ fn borrow_and_destroy() {
         println!("x is {} and borrowed", x);
     }
 
-    let x_heaped = Box::<i32>::new(42);
-    let x_stacked = 43;
+    let (x_heaped, x_stacked) = (Box::<i32>::new(42), 43);
 
     i_will_borrow(&x_heaped);
     i_will_borrow(&x_stacked);
@@ -222,8 +221,7 @@ fn aliasing() {
     }
 
     let mut point = Point { x: 5, y: 10 };
-    let borrow_a = &point;
-    let borrow_b = &point;
+    let (borrow_a, borrow_b) = (&point, &point);
 
     print_point(borrow_a);
     print_point(borrow_b);
@@ -337,6 +335,112 @@ fn lifetime_intro() {
     println!();
 } // i is destroyed - outliving its references
 
+fn lifetime_explicit() {
+    fn implicit_without_return(x: &i32) {
+        println!("implicit no return: x is {x}");
+    }
+
+    #[allow(clippy::needless_lifetimes)]
+    fn explicit_without_return<'a>(x: &'a i32) {
+        println!("explicit no return: x is {x}");
+    }
+
+    fn implicit_returned(x: &i32) -> &i32 {
+        println!("implicit returned: x is {x}");
+        x
+    }
+
+    #[allow(clippy::needless_lifetimes)]
+    fn explicit_returned<'a>(x: &'a i32) -> &'a i32 {
+        println!("explicit returned: x is {x}");
+        x
+    }
+
+    fn implicit_mut_returned(x: &mut i32) -> &mut i32 {
+        *x = x.pow(2);
+        println!("implicit mutable returned: x is {x}");
+
+        x
+    }
+
+    #[allow(clippy::needless_lifetimes)]
+    fn explicit_mut_returned<'a>(x: &'a mut i32) -> &'a mut i32 {
+        *x = x.pow(2);
+        println!("explicit mutable returned: x is {x}");
+
+        x
+    }
+
+    let [x, mut mut_x] = [42, 43];
+
+    implicit_without_return(&x);
+    explicit_without_return(&x);
+    implicit_returned(&x);
+    explicit_returned(&x);
+    implicit_mut_returned(&mut mut_x);
+    explicit_mut_returned(&mut mut_x);
+
+    println!()
+}
+
+fn lifetime_explicit_multiple_parameters() {
+    fn implicit_multiple_no_return(x: &i32, y: &i32) {
+        println!("x: {x}, y: {y}")
+    }
+
+    #[allow(clippy::needless_lifetimes)]
+    fn explicit_multiple_no_return<'a, 'b>(x: &'a i32, y: &'b i32) {
+        println!("x: {x}, y: {y}")
+    }
+
+    // this function will result in an error in compilation:
+    // we're returning a value that is a reference, but:
+    //  - we have 2 borrows in the function signature
+    //  - therefore we have 2 different lifetimes that must outlive
+    //      this function
+    // so without being explicit as to which lifetime is associated with
+    // the return type, the compiler would have to guess which lifetime
+    // to use
+    //fn implicit_multiple_with_return(x: &i32, y: &i32) -> &i32 {
+    //    x + y
+    //}
+
+    // we need to be explicit about which lifetime is being returned, and
+    // we may not return a value associated with another lifetime
+    fn explicit_multiple_with_return<'a, 'b>(x: &'a i32, y: &'b i32) -> &'a i32 {
+        println!("x: {x}, y: {y}");
+
+        x
+    }
+
+    let (x, y) = (42, 43);
+
+    implicit_multiple_no_return(&x, &y);
+    explicit_multiple_no_return(&x, &y);
+    //implicit_multiple_with_return(&x, &y);
+    explicit_multiple_with_return(&x, &y);
+
+    println!()
+}
+
+fn lifetime_explicit_static() {
+    fn explicit_static_return<'a>(x: &'a i32) -> &'static str {
+        println!("lifetimed x: {x}");
+
+        "foo"
+    }
+
+    // str will live for the duration of the application, and is thus
+    // implicitly 'static:
+    let x: &'static str = "I am built as text into the binary";
+
+    println!("static lifetime x: {x}");
+
+    explicit_static_return(&42);
+
+    println!()
+}
+
 fn main() {
     // RAII
     raii_example();
@@ -360,4 +464,7 @@ fn main() {
 
     // lifetimes
     lifetime_intro();
+    lifetime_explicit();
+    lifetime_explicit_multiple_parameters();
+    lifetime_explicit_static();
 }
