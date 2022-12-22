@@ -441,6 +441,157 @@ fn lifetime_explicit_static() {
     println!()
 }
 
+fn lifetime_methods() {
+    #[derive(Debug)]
+    struct MyNewType(i32);
+
+    impl MyNewType {
+        #[allow(clippy::needless_arbitrary_self_type)]
+        fn add_one<'a>(self: &'a mut Self) -> &'a mut Self {
+            //let Self(x) = self;
+            //*x += 1;
+            self.0 += 1;
+
+            self
+        }
+
+        #[allow(clippy::needless_arbitrary_self_type)]
+        fn debug<'a>(self: &'a Self) -> &'a Self {
+            println!("{self:?}");
+
+            self
+        }
+    }
+
+    let mut value = MyNewType(42);
+
+    println!("before: {value:?}");
+
+    value.add_one().debug();
+
+    println!();
+}
+
+fn lifetime_struct_fields() {
+    #[derive(Debug)]
+    // Each instance of this struct may not outlive the value that its
+    // reference is derived from
+    struct BorrowedTuple<'a>(&'a String);
+
+    #[derive(Debug)]
+    #[allow(dead_code)]
+    struct BorrowedNamed<'a, 'b> {
+        x: &'a String,
+        y: &'b String,
+    }
+
+    // one of the variants has a lifetime that the instance may not outlive
+    #[derive(Debug)]
+    enum Either<'a> {
+        Left(String),
+        Right(&'a String),
+    }
+
+    let x = String::from("foo");
+    let borrowed_tuple = BorrowedTuple(&x);
+
+    let y = "bar".to_owned();
+    let borrowed_named = BorrowedNamed { x: &x, y: &y };
+
+    let z = "right".to_owned();
+    let left = Either::Left("left".to_owned());
+    let right = Either::Right(&z);
+
+    println!("borrowed_tuple: {borrowed_tuple:?}");
+    println!("borrowed_named: {borrowed_named:?}");
+    println!("left: {left:?}");
+    println!("right: {right:?}");
+
+    // We can't define a reference and pass it at the same time, as the
+    // reference would then outlive the value.
+    // The value needs to outlive the Borrowed item's lifetime, so the
+    // value needs to be declared before a reference is created
+    //let invalid_borrow = Borrowed(&String::from("foo"));
+
+    //println!("invalid_borrow: {invalid_borrow:?}");
+
+    println!()
+}
+
+fn lifetime_traits() {
+    #[derive(Debug)]
+    struct TupleStruct<'a>(&'a i32);
+
+    impl<'a> Default for TupleStruct<'a> {
+        fn default() -> Self {
+            Self(&42)
+        }
+    }
+
+    // the lifetime can be defined at the `impl` declaration...
+    impl<'a> TupleStruct<'a> {
+        #[allow(clippy::needless_arbitrary_self_type)]
+        fn debug(self: &'a Self) -> &'a Self {
+            println!("{self:?}");
+
+            self
+        }
+    }
+
+    // or at the method-level
+    impl TupleStruct<'_> {
+        #[allow(clippy::needless_arbitrary_self_type)]
+        fn debug_again<'a>(self: &'a Self) -> &'a Self {
+            println!("{self:?}");
+
+            self
+        }
+    }
+
+    TupleStruct::default().debug().debug_again();
+
+    println!()
+}
+
+fn lifetime_bounds() {
+    #[derive(Debug, Clone, Copy)]
+    struct MyTupleStruct<'a>(&'a String);
+
+    impl<'a> std::fmt::Display for MyTupleStruct<'a> {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            write!(f, "MyTupleStruct({})", self.0)
+        }
+    }
+
+    #[derive(Debug, Clone, Copy)]
+    struct MyNamedStruct<'a> {
+        value: &'a String,
+    }
+
+    impl<'a> std::fmt::Display for MyNamedStruct<'a> {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            write!(f, "MyNamedStruct {{ value: {} }}", self.value)
+        }
+    }
+
+    // First, we define a lifetime parameter.
+    // Next, we indicate that the type must implement Display.
+    // Finally, we indicate that all of the type's references may not have
+    // lifetimes that exceed 'a
+    fn bounded_impl_lifetime<'a, T: std::fmt::Display + 'a>(x: T) {
+        println!("x is {x}")
+    }
+
+    let my_string = String::from("foo");
+    let tuple_struct = MyTupleStruct(&my_string);
+    let named_struct = MyNamedStruct { value: &my_string };
+
+    bounded_impl_lifetime(tuple_struct);
+    bounded_impl_lifetime(named_struct);
+
+    println!();
+}
+
 fn main() {
     // RAII
     raii_example();
@@ -467,4 +618,8 @@ fn main() {
     lifetime_explicit();
     lifetime_explicit_multiple_parameters();
     lifetime_explicit_static();
+    lifetime_methods();
+    lifetime_struct_fields();
+    lifetime_traits();
+    lifetime_bounds();
 }

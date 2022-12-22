@@ -165,6 +165,34 @@
   values, and then returns some borrowed value, we need to be explicit to
   indicate to the compiler which lifetime is being returned
 
+#### Structs and traits
+
+- fields in structs that contain references must include explicit lifetime
+  parameters
+- an instance of a struct with lifetime parameters may not outlive the lifetime
+  of the values it references
+- `impl` may also have lifetime parameters if the struct that is implementing
+  the trait has lifetime parameters
+
+#### Bounds
+
+- lifetimes are generic
+- bounds can specify that all references in a type may not outlive a given
+  lifetime parameter:
+
+  ```rust
+  // All references in T may not outlive 'a
+  fn bounded_with_lifetime<'a, T: 'a>(x: T) {
+    // ...
+  }
+
+  // T must implement Trait, and
+  // all references in T may not outlive 'a
+  fn bounded_with_trait_and_lifetime<'a, T: Trait + 'a>(x: T) {
+    // ...
+  }
+  ```
+
 ## Additional notes
 
 - [valgrind](https://valgrind.org/) is useful for profiling memory leaks on Linux
@@ -206,4 +234,17 @@
 
   ```rust
   let x: &'static str = "foo";
+  ```
+
+- one can either deconstruct a tuple struct, or access the value directly in the
+  struct:
+
+  ```rust
+  struct TupleStruct(i32);
+
+  let value = TupleStruct(42);
+  let TupleStruct(x) = value;
+  let y = value.0;
+
+  assert_eq!(x, y);
   ```
