@@ -177,7 +177,7 @@
 #### Bounds
 
 - lifetimes are generic
-- bounds can specify that all references in a type may not outlive a given
+- bounds can specify that all references in a type _must_ outlive a given
   lifetime parameter:
 
   ```rust
@@ -192,6 +192,41 @@
     // ...
   }
   ```
+
+  The references need to outlive the lifetime parameter, so as to prevent the
+  function from containing a type with a dangling reference
+
+#### Static
+
+- Rust's reserved `'static` lifetime may be encountered in two ways:
+  - references with static lifetimes, e.g. variable declarations, function
+    parameters, or return types
+  - trait bounds
+- variables with static lifetimes are stored in read-only memory
+- there are two ways to declare variables with static lifetimes:
+
+  - as constants, using the `static` keyword:
+
+    ```rust
+    static MY_CONSTANT: i32 = 42;
+    ```
+
+  - make a string literal - they have the type `&'static str`
+
+- static lifetimes may be coerced into shorter lifetimes:
+
+  ```rust
+  static MY_CONST: i32 = 42;
+  ```
+
+- as bounds, a `'static` constraint means that a type may not contain any
+  non-static references
+
+#### Coercion
+
+- in functions where a returned value is derived from an operation on two or
+  more references, Rust will attempt to coerce the lifetime of the references
+  to the shortest lifetime
 
 ## Additional notes
 
@@ -248,3 +283,16 @@
 
   assert_eq!(x, y);
   ```
+
+- shorter lifetimes can be emulated by declaring variables inside blocks:
+
+  ```rust
+  let lifetimed_var = String::from("foo");
+
+  {
+    let shorter_lifetimed_var = String::from("bar");
+  } // shorter_lifetimed_var's lifetime ends here
+  ```
+
+- `#[derive(Debug)]` is using a `Debug` macro - to implement `Debug` one needs
+  to do `use std::fmt::Debug`

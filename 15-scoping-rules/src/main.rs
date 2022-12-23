@@ -45,7 +45,7 @@ fn custom_drop() {
     }
 
     {
-        let _value = MyDropStruct(42);
+        let _value = MyDropStruct(6);
     }
 
     println!()
@@ -57,7 +57,7 @@ fn copy_into() {
     }
 
     // stack-allocated integer
-    let x = 42u32;
+    let x = 6u32;
 
     do_something(x);
 
@@ -72,7 +72,7 @@ fn move_into() {
     }
 
     // create a heap-allocated integer
-    let x = Box::new(42);
+    let x = Box::new(6);
 
     do_something(x);
 
@@ -81,7 +81,7 @@ fn move_into() {
 }
 
 fn change_of_ownership_and_mutability() {
-    let immutable_box = Box::<i32>::new(42);
+    let immutable_box = Box::<i32>::new(6);
     let mut mutable_box = immutable_box; // by reassigning, we can make the value mutable
 
     println!("mutable box: {}", mutable_box);
@@ -102,7 +102,7 @@ fn partial_moves() {
 
     let person = Person {
         name: String::from("sam"),
-        age: Box::<i32>::new(42),
+        age: Box::<i32>::new(6),
     };
     let Person { name, ref age } = person;
 
@@ -128,7 +128,7 @@ fn borrow_and_destroy() {
         println!("x is {} and borrowed", x);
     }
 
-    let (x_heaped, x_stacked) = (Box::<i32>::new(42), 43);
+    let (x_heaped, x_stacked) = (Box::<i32>::new(6), 43);
 
     i_will_borrow(&x_heaped);
     i_will_borrow(&x_stacked);
@@ -257,7 +257,7 @@ fn aliasing() {
 
 #[allow(clippy::toplevel_ref_arg)]
 fn ref_ampersand_equivalence() {
-    let x = 42;
+    let x = 6;
     let ref x_ref_a = x;
     let x_ref_b = &x;
 
@@ -318,7 +318,7 @@ fn ref_mutable_destructuring() {
 }
 
 fn lifetime_intro() {
-    let i = 42; // lifetime for i starts
+    let i = 6; // lifetime for i starts
 
     {
         let borrow_a = &i; // lifetime for borrow_a starts
@@ -371,7 +371,7 @@ fn lifetime_explicit() {
         x
     }
 
-    let [x, mut mut_x] = [42, 43];
+    let [x, mut mut_x] = [6, 43];
 
     implicit_without_return(&x);
     explicit_without_return(&x);
@@ -413,30 +413,12 @@ fn lifetime_explicit_multiple_parameters() {
         x
     }
 
-    let (x, y) = (42, 43);
+    let (x, y) = (6, 43);
 
     implicit_multiple_no_return(&x, &y);
     explicit_multiple_no_return(&x, &y);
     //implicit_multiple_with_return(&x, &y);
     explicit_multiple_with_return(&x, &y);
-
-    println!()
-}
-
-fn lifetime_explicit_static() {
-    fn explicit_static_return<'a>(x: &'a i32) -> &'static str {
-        println!("lifetimed x: {x}");
-
-        "foo"
-    }
-
-    // str will live for the duration of the application, and is thus
-    // implicitly 'static:
-    let x: &'static str = "I am built as text into the binary";
-
-    println!("static lifetime x: {x}");
-
-    explicit_static_return(&42);
 
     println!()
 }
@@ -463,7 +445,7 @@ fn lifetime_methods() {
         }
     }
 
-    let mut value = MyNewType(42);
+    let mut value = MyNewType(6);
 
     println!("before: {value:?}");
 
@@ -524,7 +506,7 @@ fn lifetime_traits() {
 
     impl<'a> Default for TupleStruct<'a> {
         fn default() -> Self {
-            Self(&42)
+            Self(&6)
         }
     }
 
@@ -564,6 +546,18 @@ fn lifetime_bounds() {
     }
 
     #[derive(Debug, Clone, Copy)]
+    struct BoundedTupleStruct<'a, T: 'a>(&'a T);
+
+    impl<'a, T> std::fmt::Display for BoundedTupleStruct<'a, T>
+    where
+        T: std::fmt::Display,
+    {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            write!(f, "BoundedTupleStruct({})", self.0)
+        }
+    }
+
+    #[derive(Debug, Clone, Copy)]
     struct MyNamedStruct<'a> {
         value: &'a String,
     }
@@ -576,20 +570,169 @@ fn lifetime_bounds() {
 
     // First, we define a lifetime parameter.
     // Next, we indicate that the type must implement Display.
-    // Finally, we indicate that all of the type's references may not have
-    // lifetimes that exceed 'a
+    // Finally, we indicate that all of the type's references must outlive
+    // the lifetime parameter
     fn bounded_impl_lifetime<'a, T: std::fmt::Display + 'a>(x: T) {
+        println!("x is {x}")
+    }
+
+    // the same as above, implemented using 'where'
+    fn bounded_impl_lifetime_alt<'a, T>(x: T)
+    where
+        T: std::fmt::Display + 'a,
+    {
         println!("x is {x}")
     }
 
     let my_string = String::from("foo");
     let tuple_struct = MyTupleStruct(&my_string);
+    let bounded_tuple_struct = BoundedTupleStruct(&my_string);
     let named_struct = MyNamedStruct { value: &my_string };
 
     bounded_impl_lifetime(tuple_struct);
+    bounded_impl_lifetime(bounded_tuple_struct);
     bounded_impl_lifetime(named_struct);
 
+    bounded_impl_lifetime_alt(tuple_struct);
+    bounded_impl_lifetime_alt(named_struct);
+
     println!();
+}
+
+fn lifetime_coercion() {
+    // This function defines a single lifetime parameter, yet the values
+    // that are passed in may or may not have the same lifetime
+    // In this situation, Rust will coerce the two lifetimes to the
+    // shortest one
+    fn multiply<'a>(x: &'a i32, y: &'a i32) -> i32 {
+        x * y
+    }
+
+    // Values with lifetime 'a must be at least as long as values with
+    // lifetime 'b
+    fn first<'a: 'b, 'b>(x: &'a i32, _: &'b i32) -> &'b i32 {
+        x
+    }
+
+    let x = 6;
+
+    {
+        let y = 43;
+
+        println!("multiple(x, y): {}", multiply(&x, &y));
+        println!("first(x, y): {}", first(&x, &y));
+        println!("first(y, x): {}", first(&y, &x));
+    }
+
+    println!()
+}
+
+fn lifetime_explicit_static() {
+    fn explicit_static_return<'a>(x: &'a i32) -> &'static str {
+        println!("lifetimed x: {x}");
+
+        "foo"
+    }
+
+    {
+        // str will live for the duration of the application, even after
+        // the variable is not accessible outside of the this block's scope
+        let x: &'static str = "I am built as text into the binary";
+
+        println!("static lifetime x: {x}");
+    }
+
+    explicit_static_return(&6);
+
+    println!()
+}
+
+fn lifetime_static_references() {
+    fn print_static_str(x: &'static str) {
+        println!("x is '{x}'")
+    }
+
+    fn return_static_str() -> &'static str {
+        "I am static"
+    }
+
+    fn print_static_int(x: &'static i32) {
+        println!("x is '{x}'")
+    }
+
+    fn return_static_int() -> &'static i32 {
+        // define a constant using 'static'
+        static X: i32 = 6;
+
+        &X
+    }
+
+    let x_str: &'static str = "foo";
+    let y_str = return_static_str();
+
+    print_static_str(x_str);
+    print_static_str(y_str);
+
+    let x_int: &'static i32 = &6;
+    let y_int = return_static_int();
+
+    print_static_int(x_int);
+    print_static_int(y_int);
+
+    println!()
+}
+
+fn lifetime_static_bounds() {
+    fn static_generic_bound<T>(x: T) -> T
+    where
+        T: 'static,
+    {
+        x
+    }
+
+    let my_string = "foo";
+
+    static_generic_bound(my_string);
+    println!();
+}
+
+fn lifetime_static_coercion() {
+    static VALUE: i32 = 6;
+
+    #[allow(clippy::needless_lifetimes)]
+    // This function:
+    //  - defines a lifetime parameter
+    //  - accepts an unused argument having that lifetime
+    //  - returns the constant, coercing its lifetime to that of the argument
+    fn coerce_static<'a>(_: &'a i32) -> &'a i32 {
+        &VALUE
+    }
+
+    let x = 5;
+
+    println!("{}", coerce_static(&x));
+    println!()
+}
+
+fn lifetime_static_bounded_int() {
+    use std::fmt::Debug;
+
+    fn print_thing(x: impl Debug + 'static) {
+        println!("x: {x:?}")
+    }
+
+    // x is:
+    //  - owned
+    //  - contains no references
+    // and is thus 'static (according to Rust by example - I'm not sure why this is true)
+    let x = 5;
+
+    // this works, because x is static
+    print_thing(x);
+
+    // this fails, because &x is a reference with a lifetime that is shorter than
+    // 'static
+    //print_thing(&x);
 }
 
 fn main() {
@@ -617,9 +760,14 @@ fn main() {
     lifetime_intro();
     lifetime_explicit();
     lifetime_explicit_multiple_parameters();
-    lifetime_explicit_static();
     lifetime_methods();
     lifetime_struct_fields();
     lifetime_traits();
     lifetime_bounds();
+    lifetime_coercion();
+    lifetime_explicit_static();
+    lifetime_static_references();
+    lifetime_static_bounds();
+    lifetime_static_coercion();
+    lifetime_static_bounded_int();
 }
