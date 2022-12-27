@@ -101,6 +101,56 @@
   specify that something that is heap allocated and implements a specific
   trait is going to be returned
 
+### Operator overloading
+
+- as in Haskell, we can define operators for specific types, .e.g "Define how
+  '+' works for a `Person` struct"
+- operator traits expect a type, which allows one to define how an operator
+  works between types:
+
+  ```rust
+  struct A;
+
+  // implement A + B
+  impl std::ops::Add<B> for A {
+    //
+  }
+
+  struct B;
+
+  // implement B + A
+  impl std::ops::Add<A> for B {
+  //
+  }
+  ```
+
+- to implement operators without consuming the types, one must use lifetimes
+  when creating the implementation:
+
+  ```rust
+  struct MyType {};
+
+  impl<'a, 'b'> std::ops::Add<&'b MyType> for &'a MyType {
+    // ...
+  }
+
+  let x = MyType {};
+  let y = MyType {};
+  let sum = &x + &y;
+  ```
+
+### Drop
+
+- the `Drop` trait allows one to modify the implementation of `drop` for a
+  given type
+- `for` can automatically turn a struct which implements `Iterator` into an
+  iterator via `.into_iter()`
+
+### Iterators
+
+- the `Iterator` trait must be used to implement iterators over collections of
+  values. The only required method is `.next`
+
 ## Additional
 
 - functions in traits are all called associated functions - they're associated
@@ -129,3 +179,11 @@
 
 - prefer `const` over `static` for constants: [Static
   items](http://doc.rust-lang.org/1.65.0/reference/items/static-items.html#using-statics-or-consts)
+- to consume an iterator without returning a value, use `.for_each(drop)`:
+
+  ```rust
+  { 0..10 }
+    .map(|x| x + 1)
+    .map(|x| println!("x is {x}"))
+    .for_each(drop) // consume the iterator without a return value
+  ```

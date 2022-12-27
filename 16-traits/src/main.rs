@@ -185,8 +185,6 @@ fn dynamic_trait_no_struct() {
 }
 
 fn return_trait_with_dyn() {
-    //use rand;
-
     trait Animal {
         fn noise(&self) -> &'static str;
         fn name(&self) -> &'static str;
@@ -226,13 +224,208 @@ fn return_trait_with_dyn() {
         }
     }
 
-    let rand_float = random();
-    let animal = random_animal(rand_float);
+    { 0..3 }
+        .into_iter()
+        .map(|_| {
+            let rand_float = random();
+            let animal = random_animal(rand_float);
 
-    println!("random value is {}", rand_float);
-    println!("{} goes {}", animal.name(), animal.noise());
+            (rand_float, animal)
+        })
+        .map(|(x, animal)| {
+            println!("random value is {}", x);
+            println!("{} goes {}\n", animal.name(), animal.noise());
+        })
+        // use .for_each(drop) to consume an iterator and throw away the result
+        .for_each(drop);
+}
 
-    println!();
+fn operator_between_types() {
+    #[derive(Debug)]
+    struct Inches(f64);
+
+    impl std::fmt::Display for Inches {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            write!(f, "{}inches", self.0)
+        }
+    }
+
+    impl std::ops::Add<Centimeters> for Inches {
+        type Output = Self;
+
+        fn add(self, rhs: Centimeters) -> Self::Output {
+            let other_inches = rhs.0 / 2.45;
+
+            Self(self.0 + other_inches)
+        }
+    }
+
+    #[derive(Debug)]
+    struct Centimeters(f64);
+
+    impl std::fmt::Display for Centimeters {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            write!(f, "{}cm", self.0)
+        }
+    }
+
+    impl std::ops::Add<Inches> for Centimeters {
+        type Output = Self;
+
+        fn add(self, rhs: Inches) -> Self::Output {
+            let other_cm = rhs.0 * 2.45;
+
+            Self(self.0 + other_cm)
+        }
+    }
+
+    let cms = Centimeters(2.0);
+    let inches = Inches(1.0);
+
+    println!("cms + inches = {}", cms + inches);
+
+    let cms = Centimeters(2.0);
+    let inches = Inches(1.0);
+
+    println!("inches + cms = {}", inches + cms);
+    println!()
+}
+
+fn operator_within_type_with_refs() {
+    #[derive(Debug)]
+    #[allow(dead_code)]
+    struct Person {
+        first_name: String,
+        last_name: String,
+        age: i32,
+    }
+
+    impl<'a, 'b> std::ops::Add<&'b Person> for &'a Person {
+        type Output = Person;
+
+        fn add(self, rhs: &'b Person) -> Self::Output {
+            let Person {
+                first_name: l_first_name,
+                last_name: l_last_name,
+                ..
+            } = self;
+            let Person {
+                first_name: r_first_name,
+                last_name: r_last_name,
+                ..
+            } = rhs;
+
+            Person {
+                age: 0,
+                first_name: [l_first_name, r_first_name].map(String::from).join("-"),
+                last_name: [l_last_name, r_last_name].map(String::from).join("-"),
+            }
+        }
+    }
+
+    let joe = Person {
+        first_name: "John".to_owned(),
+        last_name: String::from("Smith"),
+        age: 26,
+    };
+    let sam = Person {
+        first_name: "Sam".to_string(),
+        last_name: "Doe".to_string(),
+        age: 24,
+    };
+    let child_a = &joe + &sam;
+    let child_b = &sam + &joe;
+
+    println!("Child a is {child_a:?}");
+    println!("Child b is {child_b:?}");
+    println!()
+}
+
+fn drop_with_print() {
+    #[derive(Debug)]
+    #[allow(dead_code)]
+    struct DropStruct {
+        name: &'static str,
+    }
+
+    impl Drop for DropStruct {
+        fn drop(&mut self) {
+            println!("dropping {:?}", self)
+        }
+    }
+
+    fn drop_warning(x: &DropStruct) {
+        println!("{:?} is about to be dropped", x)
+    }
+
+    let x = DropStruct { name: "x" };
+
+    {
+        let y = DropStruct { name: "y" };
+
+        {
+            let z = DropStruct { name: "z" };
+
+            drop_warning(&z);
+        } // z no longer in scope
+
+        drop_warning(&y);
+    } // y no longer in scope
+
+    drop_warning(&x);
+    drop(x);
+
+    println!()
+}
+
+fn iterator_from_range() {
+    let mut range = 0..3;
+
+    println!("next is {:?}", &range.next());
+    println!("next is {:?}", &range.next());
+    println!("next is {:?}", &range.next());
+    println!("next is {:?}", &range.next());
+
+    println!()
+}
+
+fn iterator_from_impl() {
+    #[derive(Debug)]
+    struct Fibonnacci {
+        current: u32,
+        next: u32,
+    }
+
+    impl Iterator for Fibonnacci {
+        type Item = u32;
+
+        fn next(&mut self) -> Option<Self::Item> {
+            let Self { current, next } = self;
+            let (current, next) = (*next, *current + *next);
+
+            self.current = current;
+            self.next = next;
+
+            Some(current)
+        }
+    }
+
+    impl std::default::Default for Fibonnacci {
+        fn default() -> Self {
+            Self {
+                current: 0,
+                next: 1,
+            }
+        }
+    }
+
+    let mut fib = Fibonnacci::default();
+
+    for _ in 0..10 {
+        println!("fib: {:?}", fib.next());
+    }
+
+    println!()
 }
 
 fn main() {
@@ -248,4 +441,15 @@ fn main() {
     // dyn
     dynamic_trait_no_struct();
     return_trait_with_dyn();
+
+    // operators
+    operator_between_types();
+    operator_within_type_with_refs();
+
+    // drop
+    drop_with_print();
+
+    // iterators
+    iterator_from_range();
+    iterator_from_impl();
 }
