@@ -389,6 +389,16 @@ fn iterator_from_range() {
     println!()
 }
 
+fn iterator_from_array() {
+    let xs = [1u32, 2, 3, 4];
+
+    for x in xs.iter() {
+        println!("x is {}", x);
+    }
+
+    println!()
+}
+
 fn iterator_from_impl() {
     #[derive(Debug)]
     struct Fibonnacci {
@@ -425,7 +435,90 @@ fn iterator_from_impl() {
         println!("fib: {:?}", fib.next());
     }
 
+    println!("> skipping 4, and taking 4...");
+
+    let xs = fib.skip(4).take(4);
+
+    for x in xs {
+        println!("x: {x}");
+    }
+
     println!()
+}
+
+fn impl_trait_as_argument() {
+    // bounds
+    fn print_using_bounds<T: std::fmt::Debug>(x: T) {
+        println!("debug using bounds: {x:?}");
+    }
+
+    // impl trait as argument
+    fn print_using_impl_trait(x: impl std::fmt::Debug) {
+        println!("debug using impl trait: {x:?}");
+    }
+
+    let x = 5_i32;
+
+    print_using_bounds::<i32>(x);
+
+    // turbofish syntax is invalid when using 'impl Trait'
+    //print_using_impl_trait::<i32>(x);
+    print_using_impl_trait(x);
+    println!()
+}
+
+fn impl_trait_as_return() {
+    // return type defined using bound and 'where'
+    fn id_as_bounded_return<T>(x: T) -> T
+    where
+        T: std::ops::Add<Output = T> + std::fmt::Debug,
+    {
+        x
+    }
+
+    // return type defined using 'impl Trait'
+    fn id_as_impl_trait_return(
+        x: impl std::ops::Add + std::fmt::Debug,
+    ) -> impl std::ops::Add + std::fmt::Debug {
+        x
+    }
+
+    let x = id_as_bounded_return::<i8>(1);
+    let y = id_as_impl_trait_return(1);
+
+    // as with 'impl Trait' arguments, it is invalid to use turbofish to
+    // coerce types with
+    //let z = id_as_impl_trait_return::<i8>(1);
+
+    println!("x: {x:?}, y: {y:?}");
+    println!()
+}
+
+fn impl_trait_argument_real_world() {
+    fn parse_csv_using_bounds<R: std::io::BufRead>(src: R) -> std::io::Result<Vec<Vec<String>>> {
+        src.lines()
+            .map(|line_result| {
+                line_result.map(|row| {
+                    row.split(',')
+                        .map(|field| String::from(field.trim()))
+                        .collect()
+                })
+            })
+            .collect()
+
+        //src.lines()
+        //    .map(|line| {
+        //        // For each line in the source
+        //        line.map(|line| {
+        //            // If the line was read successfully, process it, if not, return the error
+        //            line.split(',') // Split the line separated by commas
+        //                .map(|entry| String::from(entry.trim())) // Remove leading and trailing whitespace
+        //                .collect() // Collect all strings in a row into a Vec<String>
+        //        })
+        //    })
+        //    .collect() // Collect all lines into a Vec<Vec<String>>
+        //}
+    }
 }
 
 fn main() {
@@ -451,5 +544,11 @@ fn main() {
 
     // iterators
     iterator_from_range();
+    iterator_from_array();
     iterator_from_impl();
+
+    // impl Trait
+    impl_trait_as_argument();
+    impl_trait_as_return();
+    impl_trait_argument_real_world();
 }

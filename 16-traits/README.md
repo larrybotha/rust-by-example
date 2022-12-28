@@ -143,13 +143,62 @@
 
 - the `Drop` trait allows one to modify the implementation of `drop` for a
   given type
-- `for` can automatically turn a struct which implements `Iterator` into an
-  iterator via `.into_iter()`
 
 ### Iterators
 
 - the `Iterator` trait must be used to implement iterators over collections of
   values. The only required method is `.next`
+- `for` can automatically turn a struct which implements `Iterator` into an
+  iterator via `.into_iter()`:
+
+  ```rust
+  let xs: [i32; 3] = [1,2,3];
+
+  for x in xs.iter() {
+    println!("{x}");
+  }
+  ```
+
+- structs that implement `Iterator` have a few useful methods available them,
+  such as `.skip`, `.take`, `.sum`, etc.
+
+### `impl Trait`
+
+- similar to type hints in Python, we can specify that either an argument to a
+  function, or its return value implement a specific trait
+
+  - as function arguments:
+
+    ```rust
+    // using bounds
+    fn my_func<T: MyTrait>(x: T) {
+      // ...
+    }
+
+    // using impl Trait
+    fn my_func(x impl MyTrait) {
+      // ...
+    }
+
+    ```
+
+  - as function return types:
+
+    ```rust
+    // using 'where'
+    fn my_func() -> T where T: MyTrait {
+      // ...
+    }
+
+    // using impl Trait
+    fn my_func() -> T impl MyTrait {
+      // ...
+    }
+    ```
+
+- a limitation of using the `impl Trait` is that the turbofish syntax may not be
+  used to coerce types, either when it is used for function arguments, or
+  return types
 
 ## Additional
 
