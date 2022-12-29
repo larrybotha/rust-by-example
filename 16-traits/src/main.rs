@@ -495,6 +495,7 @@ fn impl_trait_as_return() {
 }
 
 fn impl_trait_argument_real_world() {
+    // using bounds
     fn parse_csv_using_bounds<R: std::io::BufRead>(src: R) -> std::io::Result<Vec<Vec<String>>> {
         src.lines()
             .map(|line_result| {
@@ -505,20 +506,120 @@ fn impl_trait_argument_real_world() {
                 })
             })
             .collect()
-
-        //src.lines()
-        //    .map(|line| {
-        //        // For each line in the source
-        //        line.map(|line| {
-        //            // If the line was read successfully, process it, if not, return the error
-        //            line.split(',') // Split the line separated by commas
-        //                .map(|entry| String::from(entry.trim())) // Remove leading and trailing whitespace
-        //                .collect() // Collect all strings in a row into a Vec<String>
-        //        })
-        //    })
-        //    .collect() // Collect all lines into a Vec<Vec<String>>
-        //}
     }
+
+    // using impl Trait
+    fn parse_csv_using_impl_trait(src: impl std::io::BufRead) -> std::io::Result<Vec<Vec<String>>> {
+        src.lines()
+            .map(|line_result| {
+                line_result.map(|row| {
+                    row.split(',')
+                        .map(|field| String::from(field.trim()))
+                        .collect()
+                })
+            })
+            .collect()
+    }
+
+    let csv_data = "a,b,c\nd,e,f";
+    let csv_x = std::io::Cursor::new(csv_data);
+    let csv_y = csv_x.clone();
+
+    assert_eq!(csv_x, csv_y);
+    println!("csv_x: {:?}", parse_csv_using_bounds(csv_x));
+    println!("csv_y: {:?}", parse_csv_using_impl_trait(csv_y));
+    println!();
+}
+
+fn impl_trait_return_real_world() {
+    use std::iter;
+    use std::vec::IntoIter;
+
+    // explicit return
+    fn chain_and_cycle_explicit(
+        u: Vec<i32>,
+        v: Vec<i32>,
+    ) -> iter::Cycle<iter::Chain<IntoIter<i32>, IntoIter<i32>>> {
+        u.into_iter().chain(v.into_iter()).cycle()
+    }
+
+    // return using impl Trait
+    fn chain_and_cycle_impl_trait(u: Vec<i32>, v: Vec<i32>) -> impl Iterator<Item = i32> {
+        u.into_iter().chain(v.into_iter()).cycle()
+    }
+
+    let xs = Vec::from([1, 2]);
+    let ys = Vec::from([3, 4]);
+    let mut iter_a = chain_and_cycle_explicit(xs.clone(), ys.clone());
+    let mut iter_b = chain_and_cycle_impl_trait(xs, ys);
+
+    { 0..6 }
+        .map(|i| {
+            let (x, y) = (iter_a.next(), iter_b.next());
+
+            println!("iteration {} -> iter_a: {:?}", i, x);
+            println!("iteration {} -> iter_b: {:?}\n", i, y);
+        })
+        .for_each(drop)
+}
+
+fn supertraits() {
+    trait Nameable {
+        fn name(&self) -> String;
+    }
+
+    // Classable is a subtrait, with Nameable as its supertrait
+    trait Classable: Nameable {
+        fn class(&self) -> String;
+    }
+
+    // Indexable is a subtrait of both Nameable and Classable
+    trait Indexable: Nameable + Classable {
+        fn index(&self) -> i32;
+    }
+
+    #[derive(Debug)]
+    struct Animal {
+        name: String,
+        class: String,
+        index: i32,
+    }
+
+    impl Animal {
+        fn new(name: String) -> Self {
+            Self {
+                name,
+                class: "Unknown".to_string(),
+                index: 0,
+            }
+        }
+    }
+
+    // Animal must implement Nameable
+    impl Nameable for Animal {
+        fn name(&self) -> String {
+            self.name.to_string()
+        }
+    }
+
+    // Animal must implement Classable
+    impl Classable for Animal {
+        fn class(&self) -> String {
+            self.class.to_string()
+        }
+    }
+
+    // Animal must implement Indexable
+    impl Indexable for Animal {
+        fn index(&self) -> i32 {
+            self.index
+        }
+    }
+
+    let animal = Animal::new("Goat".to_string());
+
+    println!("animal: {:?}", animal);
+    println!()
 }
 
 fn main() {
@@ -551,4 +652,8 @@ fn main() {
     impl_trait_as_argument();
     impl_trait_as_return();
     impl_trait_argument_real_world();
+    impl_trait_return_real_world();
+
+    // supertraits
+    supertraits();
 }
