@@ -646,6 +646,22 @@ fn disambiguation() {
 
     <MyType as A>::foo(&x);
     <MyType as B>::foo(&x);
+    println!()
+}
+
+fn fully_qualified_syntax() {
+    struct S {}
+
+    impl S {
+        fn foo(&self) {
+            println!("foo!")
+        }
+    }
+
+    let x = S {};
+
+    // calling S's method foo for x by passing x in as a reference
+    S::foo(&x);
 }
 
 fn main() {
@@ -685,4 +701,5 @@ fn main() {
 
     // disambiguation
     disambiguation();
+    fully_qualified_syntax();
 }

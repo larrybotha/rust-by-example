@@ -244,12 +244,16 @@
 
   let x = S {};
 
-  // x.foo() is invalid - we need to disambiguate
+  // x.foo() is invalid - we need to disambiguate using Fully Qualified Syntax
 
   <S as A>::foo(&x);
 
   <S as B>::foo(&x);
   ```
+
+- disambiguation requires using _Fully Qualified Syntax_ - call the associated
+  function directly from the type, passing in the instance the method would be
+  called on if the method were called on the instance directly
 
 ## Additional
 
