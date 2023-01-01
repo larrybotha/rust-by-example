@@ -203,26 +203,53 @@
 ### Supertraits
 
 - Rust doesn't have inheritance, but we can define a trait as being a supertrait
-    of another:
+  of another:
 
-    ```rust
-    trait SuperTrait {
-      // ...
-    }
+  ```rust
+  trait SuperTrait {
+    // ...
+  }
 
-    trait SubTrait: SuperTrait {
-      //
-    }
-    ```
+  trait SubTrait: SuperTrait {
+    //
+  }
+  ```
+
 - traits that have supertraits require implementing all the associated functions
-    of the supertrait in addition to their own associated functions. Unlike in
-    Python where all methods may be defined in the class inheriting the super
-    classes, in Rust, each trait must be separately implemented
+  of the supertrait in addition to their own associated functions. Unlike in
+  Python where all methods may be defined in the class inheriting the super
+  classes, in Rust, each trait must be separately implemented
 - traits that have supertraits are called _subtraits_
 
 ### Disambiguating overlapping traits
 
--
+- when implementing multiple traits for a type, there may be associated
+  functions with the same name on the different traits. Implementing the
+  functions on the type is straight-forward enough, as the implementations are
+  entirely isolated from each other, but when calling the functions, we need
+  to disambiguate with a coercion-like syntax:
+
+  ```rust
+  trait A {
+    fn foo(&self) {}
+  }
+
+  trait B {
+    fn foo(&self) {}
+  }
+
+  struct S {}
+  impl A for S {}
+  impl B for S {}
+
+  let x = S {};
+
+  // x.foo() is invalid - we need to disambiguate
+
+  <S as A>::foo(&x);
+
+  <S as B>::foo(&x);
+  ```
 
 ## Additional
 
@@ -260,6 +287,7 @@
     .map(|x| println!("x is {x}"))
     .for_each(drop) // consume the iterator without a return value
   ```
+
 - `core::iter::Iterator::chain` is analagous to `itertools.chain` in Python, and
-    `Array.concat` in Javascript - it appends an iterable / iterator to an
-    existing one
+  `Array.concat` in Javascript - it appends an iterable / iterator to an
+  existing one

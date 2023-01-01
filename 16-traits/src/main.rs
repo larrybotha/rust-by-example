@@ -622,6 +622,32 @@ fn supertraits() {
     println!()
 }
 
+fn disambiguation() {
+    trait A {
+        fn foo(&self) {
+            println!("A::foo() called")
+        }
+    }
+
+    trait B {
+        fn foo(&self) {
+            println!("B::foo")
+        }
+    }
+
+    struct MyType {}
+
+    impl A for MyType {}
+    impl B for MyType {}
+
+    let x = MyType {};
+
+    // x.foo() is invalid due to .foo being ambiguous
+
+    <MyType as A>::foo(&x);
+    <MyType as B>::foo(&x);
+}
+
 fn main() {
     internal_access();
     instantiate_via_trait();
@@ -656,4 +682,7 @@ fn main() {
 
     // supertraits
     supertraits();
+
+    // disambiguation
+    disambiguation();
 }
