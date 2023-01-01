@@ -21,6 +21,7 @@ Learning and annotations from the [Rust By Example book](https://doc.rust-lang.o
 - [Generics](./14-generics)
 - [Scoping Rules](./15-scoping-rules)
 - [Traits](./16-traits)
+- [macro_rules!](./17-macro-rules)
 
 ## Links and resources
 
