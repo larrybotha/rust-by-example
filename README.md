@@ -20,6 +20,7 @@ Learning and annotations from the [Rust By Example book](https://doc.rust-lang.o
 - [Attributes](./13-attributes)
 - [Generics](./14-generics)
 - [Scoping Rules](./15-scoping-rules)
+- [Traits](./16-traits)
 
 ## Links and resources
 
