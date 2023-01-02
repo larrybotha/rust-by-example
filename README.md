@@ -22,6 +22,7 @@ Learning and annotations from the [Rust By Example book](https://doc.rust-lang.o
 - [Scoping Rules](./15-scoping-rules)
 - [Traits](./16-traits)
 - [macro_rules!](./17-macro-rules)
+- [Error Handling](./18-error-handling)
 
 ## Links and resources
 
