@@ -56,10 +56,40 @@ fn option_expect() {
     use std::panic;
 
     let x: Option<i32> = None;
+    let y: Option<i32> = Some(5);
     let panic_result = panic::catch_unwind(|| x.expect("custom panic message!"));
+    let valid_result = panic::catch_unwind(|| y.unwrap());
 
-    println!("{:?}", panic_result);
+    println!("panic result: {:?}", panic_result);
+    println!("valid result: {:?}", valid_result);
     println!();
+}
+
+fn option_matching() {
+    type Drink<'a> = Option<&'a str>;
+
+    fn have_drink(drink: Drink) {
+        match drink {
+            Some("lemonade") => {
+                println!("mmm, lemonade")
+            }
+            Some(inner) => {
+                println!("mmm, not lemonade, but {}", inner)
+            }
+            None => {
+                println!("awww... thirsty")
+            }
+        }
+    }
+
+    let x: Drink = Some("lemonade");
+    let y: Drink = Some("coffee");
+    let z: Drink = None;
+
+    have_drink(x);
+    have_drink(y);
+    have_drink(z);
+    println!()
 }
 
 fn main() {
@@ -71,4 +101,5 @@ fn main() {
     // option and unwrap
     option_unwrap();
     option_expect();
+    option_matching();
 }
