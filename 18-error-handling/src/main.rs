@@ -42,9 +42,33 @@ fn abort_condition_compiletime() {
     println!()
 }
 
+fn option_unwrap() {
+    use std::panic;
+
+    let x: Option<i32> = None;
+    let panic_result = panic::catch_unwind(|| x.unwrap());
+
+    println!("{:?}", panic_result);
+    println!()
+}
+
+fn option_expect() {
+    use std::panic;
+
+    let x: Option<i32> = None;
+    let panic_result = panic::catch_unwind(|| x.expect("custom panic message!"));
+
+    println!("{:?}", panic_result);
+    println!();
+}
+
 fn main() {
     // panic
     panic_example();
     abort_condition_runtime();
     abort_condition_compiletime();
+
+    // option and unwrap
+    option_unwrap();
+    option_expect();
 }

@@ -84,6 +84,17 @@ fn gimme_even(x: i32) {
   cargo --config 'profile.dev.panic = "abort"' run
   ```
 
+### `Option` and `unwrap`
+
+- `Option` is an enum which encapsulates the possibility of absence of a value
+- A value of `Option` is either `Some`, or `None`, and these variants can be
+  handled in one of two ways:
+  - explicitly using `match`
+  - implicitly using `unwrap` or `expect`
+- using `unwrap` will either return the value, or `panic`
+- `expect` operates similarly to `unwrap`, with the different that the `panic`
+  message can be modified
+
 ## Additional
 
 - `not` can be used in attributes:
@@ -92,3 +103,5 @@ fn gimme_even(x: i32) {
   #[cfg(not(target_os = "macos"))]
   fn do_the_thing() {}
   ```
+
+- one can use `std::panic::catch_unwind` to catch panics
