@@ -28,6 +28,9 @@ Learning and annotations from the [Rust By Example book](https://doc.rust-lang.o
 
 - [A half hour to learn Rust](https://fasterthanli.me/articles/a-half-hour-to-learn-rust)
 - [Learn Rust The Dangerous Way](http://cliffle.com/p/dangerust/)
+- [Elements of Rust](https://github.com/ferrous-systems/elements-of-rust)
+- [Idiomatic Rust](https://github.com/mre/idiomatic-rust)
+- [Awesome Rust](https://awesome-rust.com/)
 
 ## TODO
 
