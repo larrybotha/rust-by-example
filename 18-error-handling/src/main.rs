@@ -142,6 +142,29 @@ fn option_chaining() {
     println!()
 }
 
+fn option_map() {
+    fn double(x: i32) -> i32 {
+        x * 2
+    }
+
+    fn square(x: i32) -> i32 {
+        x.pow(2)
+    }
+
+    fn process(x: Option<i32>) -> Option<i32> {
+        x.map(double).map(square).map(|n| n - 1)
+    }
+
+    let x = Some(6).map(double).map(square).map(|n| n - 1);
+    let y = process(Some(6));
+    let z = process(None);
+
+    println!("x: {:?}", x);
+    println!("y: {:?}", y);
+    println!("z: {:?}", z);
+    println!()
+}
+
 fn main() {
     // panic
     panic_example();
@@ -154,4 +177,5 @@ fn main() {
     option_matching();
     option_unpacking();
     option_chaining();
+    option_map();
 }

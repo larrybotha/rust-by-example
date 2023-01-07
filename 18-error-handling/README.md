@@ -132,7 +132,8 @@ fn gimme_even(x: i32) {
 
 #### Combinators: `map`
 
--
+- `Option` is a functor, where `.map` operates in the same way as `Array.map` in
+  Javascript, always returning an `Option`
 
 ## Additional
 
