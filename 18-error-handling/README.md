@@ -2,6 +2,7 @@
 
 - https://doc.rust-lang.org/stable/rust-by-example/error.html
 - https://doc.rust-lang.org/book/ch09-00-error-handling.html
+- https://doc.rust-lang.org/reference/glossary.html#combinator
 
 ## Takeaways
 
@@ -94,6 +95,44 @@ fn gimme_even(x: i32) {
 - using `unwrap` will either return the value, or `panic`
 - `expect` operates similarly to `unwrap`, with the different that the `panic`
   message can be modified
+
+#### Unpacking `Option` with `?`
+
+- similar to Javascript's optional chaining, one can unpack a value of type
+  `Option` using `?`:
+
+  ```rust
+  fn maybe_plus_one(x: Option<i32>) -> Option<i32> {
+    x? + 1
+  }
+  ```
+
+  If `x` is `None` above, `None` is returned by `maybe_plus_one`. This is true
+  for any function using `?` to unpack `Option` - the compiler requires that
+  functions using `?` either return `Option` or `Result`
+
+- `?` can also be used for chaining:
+
+  ```rust
+  struct A {
+    b: Some(B)
+  }
+
+  struct B {
+    c: Some(C)
+  }
+
+  struct C {
+    value: i32
+  }
+
+  let x = A { b: Some(B { c: Some(C { value: 5 }) }) };
+  let value = x.b?.c?.value; // Some(5), otherwise None
+  ```
+
+#### Combinators: `map`
+
+-
 
 ## Additional
 

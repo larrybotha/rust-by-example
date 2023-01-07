@@ -92,6 +92,56 @@ fn option_matching() {
     println!()
 }
 
+fn option_unpacking() {
+    fn maybe_plus_one(x: Option<i32>) -> Option<String> {
+        let plus_one = x? + 1;
+
+        Some(plus_one.to_string())
+    }
+
+    let x = Some(1);
+    let y = None;
+
+    println!("Some(1) plus one'd: {:?}", maybe_plus_one(x));
+    println!("None plus one'd: {:?}", maybe_plus_one(y));
+    println!()
+}
+
+fn option_chaining() {
+    #[derive(Debug)]
+    struct A {
+        foo: Option<Foo>,
+    }
+
+    #[derive(Debug)]
+    struct Foo {
+        bar: Option<Bar>,
+    }
+
+    #[derive(Debug)]
+    struct Bar {
+        value: i32,
+    }
+
+    fn maybe_value(x: A) -> Option<i32> {
+        // A similar syntax to 'optional chaining' in Javascript
+        Some(x.foo?.bar?.value)
+    }
+
+    let x = A {
+        foo: Some(Foo {
+            bar: Some(Bar { value: 6 }),
+        }),
+    };
+    let y = A {
+        foo: Some(Foo { bar: None }),
+    };
+
+    println!("x's deep value: {:?}", maybe_value(x));
+    println!("y's deep value: {:?}", maybe_value(y));
+    println!()
+}
+
 fn main() {
     // panic
     panic_example();
@@ -102,4 +152,6 @@ fn main() {
     option_unwrap();
     option_expect();
     option_matching();
+    option_unpacking();
+    option_chaining();
 }
