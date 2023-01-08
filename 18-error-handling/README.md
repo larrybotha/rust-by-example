@@ -2,7 +2,6 @@
 
 - https://doc.rust-lang.org/stable/rust-by-example/error.html
 - https://doc.rust-lang.org/book/ch09-00-error-handling.html
-- https://doc.rust-lang.org/reference/glossary.html#combinator
 
 ## Takeaways
 
@@ -130,10 +129,16 @@ fn gimme_even(x: i32) {
   let value = x.b?.c?.value; // Some(5), otherwise None
   ```
 
-#### Combinators: `map`
+#### Combinators
 
-- `Option` is a functor, where `.map` operates in the same way as `Array.map` in
+- see [Rust's reference for combinators](https://doc.rust-lang.org/reference/glossary.html#combinator)
+- `Option` is a functor, with `.map` operating in the same way as `Array.map` in
   Javascript, always returning an `Option`
+- the type of `Option` can change between maps
+- `and_then` is equivalent to `flatmap` in other languages, except that a
+  handler is required. To flatten without manipulating the contents of the
+  `Option`, one can use `.flatten`
+- `Option::and_then` is equivalent to `Option::flatten().Option::map`
 
 ## Additional
 
@@ -145,3 +150,32 @@ fn gimme_even(x: i32) {
   ```
 
 - one can use `std::panic::catch_unwind` to catch panics
+- as in Javascript, when mapping, and the value being operated on will be passed
+  to a function or constructor directly, there's no need to use a closure:
+
+  ```rust
+  struct MyTuple(i32);
+
+  // redundant closure
+  let verbose = Some(6).map(|v| MyTuple(v));
+  // passing the value directly into the constructor
+  let terse = Some(6).map(MyTuple);
+  ```
+
+- one can deconstruct values at the argument level:
+
+  ```rust
+  struct Thing(i32);
+
+  let x = Option<Thing(6)>;
+  let x_doubled = x.map(|Thing(v)| => v * 2);
+  ```
+
+- Rust has a built-in `identity` function:
+
+  ```rust
+  let x = Some(6);
+  let y = x.map(std::convert::identity);
+
+  assert_eq!(x, y);
+  ```

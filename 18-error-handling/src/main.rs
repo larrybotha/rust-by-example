@@ -165,6 +165,152 @@ fn option_map() {
     println!()
 }
 
+fn option_map_terse() {
+    #[derive(Debug)]
+    #[allow(dead_code)]
+    enum Food {
+        Apple,
+        Orange,
+        Banana,
+    }
+
+    #[derive(Debug)]
+    struct Peeled(Food);
+    #[derive(Debug)]
+    struct Chopped(Food);
+    #[derive(Debug)]
+    struct Cooked(Food);
+
+    fn peel(x: Option<Food>) -> Option<Peeled> {
+        #[allow(clippy::manual_map)]
+        match x {
+            Some(food) => Some(Peeled(food)),
+            None => None,
+        }
+    }
+
+    fn chop(x: Option<Peeled>) -> Option<Chopped> {
+        #[allow(clippy::manual_map)]
+        match x {
+            // deconstruct x
+            Some(Peeled(food)) => Some(Chopped(food)),
+            None => None,
+        }
+    }
+
+    fn cook(x: Option<Chopped>) -> Option<Cooked> {
+        match x {
+            // manually get the food out of Chopped using a tuple accessor
+            Some(food) => Some(Cooked(food.0)),
+            None => None,
+        }
+    }
+
+    // a single function, using `map` to perform the same work as
+    // `match` does in the individual functions above
+    fn process(x: Option<Food>) -> Option<Cooked> {
+        // Peeled is a function, so no need to use a closure
+        x.map(Peeled)
+            // manually get the food out of Peeled using a tuple accessor
+            .map(|peeled| Chopped(peeled.0))
+            // or deconstruct from the argument
+            .map(|Chopped(food)| Cooked(food))
+    }
+
+    let apple = Some(Food::Apple);
+    let orange = Some(Food::Orange);
+
+    // noisy
+    let cooked_apple = cook(chop(peel(apple)));
+    // terse
+    let cooked_orange = process(orange);
+
+    println!("apple: {:?}", cooked_apple);
+    println!("orange: {:?}", cooked_orange);
+    println!()
+}
+
+fn option_and_then() {
+    let x = Some(6);
+    let nested_x = x.map(Some);
+    let flattened_x_a = nested_x.and_then(core::convert::identity);
+    let flattened_x_b = nested_x.flatten();
+
+    println!("x: {:?}", x);
+    println!("nested_x: {:?}", nested_x);
+    println!("flattened_x_a: {:?}", flattened_x_a);
+    println!("flattened_x_b: {:?}", flattened_x_b);
+    println!()
+}
+
+fn option_and_then_terse() {
+    #[allow(dead_code)]
+    #[derive(Debug)]
+    enum Food {
+        CordonBleu,
+        Steak,
+        Sushi,
+    }
+
+    #[allow(dead_code)]
+    #[derive(Debug)]
+    enum Day {
+        Monday,
+        Tuesday,
+        Wednesday,
+    }
+
+    fn have_ingredients(food: Food) -> Option<Food> {
+        match food {
+            // we don't have ingredients for Sushi
+            Food::Sushi => None,
+            _ => Some(food),
+        }
+    }
+
+    fn have_recipe(food: Food) -> Option<Food> {
+        match food {
+            // we don't have a recipe for CordonBleu
+            Food::CordonBleu => None,
+            _ => Some(food),
+        }
+    }
+
+    #[allow(dead_code)]
+    // we can chain matches, but it gets noisy very quickly
+    fn cookable_v1(food: Food) -> Option<Food> {
+        match have_recipe(food) {
+            None => None,
+            #[allow(clippy::manual_map)]
+            Some(x) => match have_ingredients(x) {
+                None => None,
+                Some(y) => Some(y),
+            },
+        }
+    }
+
+    // instead of chaining matches, we can use .and_then on Option to
+    // remove one level of nesting of Option, and pass the value to
+    // another handler
+    fn cookable_v2(food: Food) -> Option<Food> {
+        have_recipe(food).and_then(have_ingredients)
+    }
+
+    fn eat(food: Food, day: Day) {
+        match cookable_v2(food) {
+            None => println!("we have no food on {:?}!", day),
+            Some(x) => println!("we get to eat {:?} on {:?}", x, day),
+        }
+    }
+
+    let (cordon_bleu, steak, sushi) = (Food::CordonBleu, Food::Steak, Food::Sushi);
+
+    eat(cordon_bleu, Day::Monday);
+    eat(steak, Day::Tuesday);
+    eat(sushi, Day::Wednesday);
+    println!()
+}
+
 fn main() {
     // panic
     panic_example();
@@ -178,4 +324,7 @@ fn main() {
     option_unpacking();
     option_chaining();
     option_map();
+    option_map_terse();
+    option_and_then();
+    option_and_then_terse();
 }
