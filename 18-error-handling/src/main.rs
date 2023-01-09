@@ -348,6 +348,114 @@ fn option_get_or_insert() {
     println!()
 }
 
+fn result_parse() {
+    use std::panic;
+
+    let ok_result = "4".parse::<i32>();
+    let err_result = panic::catch_unwind(|| "foo".parse::<i32>()).unwrap();
+
+    println!("ok_result: {:?}", ok_result);
+    println!("err_result: {:?}", err_result);
+    println!()
+}
+
+fn result_map() {
+    fn multiply_verbose(x: &str, y: &str) -> Result<i32, std::num::ParseIntError> {
+        let x_parsed = match x.parse::<i32>() {
+            Err(e) => return Err(e),
+            Ok(n) => n,
+        };
+        let y_parsed = match y.parse::<i32>() {
+            Err(f) => return Err(f),
+            Ok(m) => m,
+        };
+
+        Ok(x_parsed * y_parsed)
+    }
+
+    fn multiply_terse(x: &str, y: &str) -> Result<i32, std::num::ParseIntError> {
+        x.parse::<i32>()
+            // use .and_then to flatten a nested Result containing the product
+            .and_then(|x_int| y.parse::<i32>().map(|y_int| x_int * y_int))
+    }
+
+    let x = "4";
+    let y = "5";
+    let result_verbose = multiply_verbose(x, y);
+    let result_terse = multiply_terse(x, y);
+
+    assert_eq!(result_verbose, result_terse);
+
+    println!("multiply_verbose: {:?}", result_verbose);
+    println!("multiply_terse: {:?}", result_terse);
+    println!()
+}
+
+fn result_alias() {
+    type ParsedIntResult = Result<i32, std::num::ParseIntError>;
+
+    fn multiply(x: &str, y: &str) -> ParsedIntResult {
+        let (x_parsed, y_parsed) = (x.parse::<i32>(), y.parse::<i32>());
+
+        x_parsed.and_then(|x_int| y_parsed.map(|y_int| x_int * y_int))
+    }
+
+    let x = "5";
+    let y = "4";
+    let result = multiply(x, y);
+
+    assert_eq!(result, Ok(20));
+
+    println!("result: {:?}", result);
+    println!()
+}
+
+fn result_early_returns() {
+    type ParsedIntResult = Result<i32, std::num::ParseIntError>;
+
+    // a more verbose implementation of `multiply`, but arguably easier to
+    // read
+    fn multiply(x: &str, y: &str) -> ParsedIntResult {
+        let x_parsed = match x.parse::<i32>() {
+            // assign x_parsed to n
+            Ok(n) => n,
+            // use an early return to prevent subsequent execution
+            Err(e) => return Err(e),
+        };
+        let y_parsed = match y.parse::<i32>() {
+            Ok(n) => n,
+            Err(e) => return Err(e),
+        };
+
+        Ok(x_parsed * y_parsed)
+    }
+
+    let (x, y) = ("5", "4");
+    let result = multiply(x, y);
+
+    println!("result: {result:?}");
+    println!()
+}
+
+fn result_question_mark() {
+    type ParsedIntResult = Result<i32, std::num::ParseIntError>;
+
+    fn multiply(x: &str, y: &str) -> ParsedIntResult {
+        // use question marks to extract the value from Result without panicing
+        let (x_parsed, y_parsed) = (x.parse::<i32>()?, y.parse::<i32>()?);
+
+        Ok(x_parsed * y_parsed)
+    }
+
+    let ok_result = multiply("4", "5");
+    // does not panic
+    let err_result = multiply("t", "5");
+
+    println!("ok_result: {ok_result:?}");
+    println!("err_result: {err_result:?}");
+    println!()
+}
+
 fn main() {
     // panic
     panic_example();
@@ -366,4 +474,11 @@ fn main() {
     option_and_then_terse();
     option_or();
     option_get_or_insert();
+
+    // result
+    result_parse();
+    result_map();
+    result_alias();
+    result_early_returns();
+    result_question_mark();
 }

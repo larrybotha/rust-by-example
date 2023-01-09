@@ -2,6 +2,7 @@
 
 - https://doc.rust-lang.org/stable/rust-by-example/error.html
 - https://doc.rust-lang.org/book/ch09-00-error-handling.html
+- https://doc.rust-lang.org/stable/rust-by-example/error/multiple_error_types/reenter_question_mark.html
 
 ## Takeaways
 
@@ -156,6 +157,61 @@ fn gimme_even(x: i32) {
 - `.get_or_insert()` mutates the original value, so it expects only the value
   that `Option` will hold
 
+### `Result`
+
+- `Result` is similar to `Option`, except that it deals primarily with _possible
+  errors_ instead of the _absence of values_
+- for `Result` we have:
+  - `Ok(T)` which is analogous to `Some(T)`
+  - `Err(E)` which is analogous to `None`
+- `Result` has many methods and combinators that operate in a similar manner to
+  methods and combinators of `Option. e.g. `.unwrap`will either yield a value, or `panic`
+- a `Result` is returned by many methods and functions where a value cannot be
+  processed, such as with `str::parse`:
+
+  ```rust
+  let ok_result = "4".parse();
+  let err_result = std::panic::catch_unwind(|| "foo".parse()).unwrap();
+  ```
+
+- `main` can either return unit, or `Result`:
+
+  ```rust
+  use std::num::ParseIntError;
+
+  fn main() -> Result<(), ParseIntError> {
+    let x = "5";
+    let number = match x.parse::<i32>() {
+      Ok(n) => n,
+      Err(e) => return Err(e)
+    }
+
+    println!("{}", number);
+
+    Ok(())
+  }
+  ```
+
+- as with `Option`, matching on `Ok` and `Err` for `Result` is cumbersome, and
+  we can instead use `.map` and `.and_then` as a terse alternative
+- early returns paired with `match` blocks can make code easier to read in some
+  cases than using `.and_then`
+- `?` allows us to attempt to extract the value out of a `Result` without
+  `panic`ing. `?` works like `.unwrap`, but it prevents the application from
+  `panic`ing:
+
+  ```rust
+  let result = "t".parse::<i32>()?; // => Result<i32, std::num::ParseIntError>
+  ```
+
+- before `?` there was the `try!` macro, which did the same thing:
+
+  ```rust
+  let result = try!("t".parse::<i32>());
+  ```
+
+  `try!` has been deprecated, and `?` is now the recommended approach
+
 ## Additional
 
 - `not` can be used in attributes:
@@ -194,4 +250,15 @@ fn gimme_even(x: i32) {
   let y = x.map(std::convert::identity);
 
   assert_eq!(x, y);
+  ```
+
+- `i32` implements `FromStr`, which
+- aliases are convenient for describing verbose types:
+
+  ```rust
+  type ComplexResult = Result<i32, std::num::ParseIntError>;
+
+  fn do_something() -> ComplexResult {
+    // ...
+  }
   ```
