@@ -138,7 +138,23 @@ fn gimme_even(x: i32) {
 - `and_then` is equivalent to `flatmap` in other languages, except that a
   handler is required. To flatten without manipulating the contents of the
   `Option`, one can use `.flatten`
-- `Option::and_then` is equivalent to `Option::flatten().Option::map`
+- `.and_then` will unwrap the `Option`, pass the value into a function or
+  closure, and then ensure that the resulting `Option` is not nested
+- `Option::and_then` is equivalent to `Option::map().Option::flatten`
+
+#### Unpacking options and defaults
+
+- `Option` has a few methods that allows us to unpack values and deal with
+  defaults:
+  - `.or()` - eagerly unpack `None` with a default
+  - `.or_else()` - lazily unpack `None` with a default, using a closure
+  - `.get_or_insert()` - eagerly unpack the value, otherwise insert the given
+    value into the option
+  - `.get_or_insert_with()` - lazily unpack the value, otherwise insert a value
+    into the option given a closure
+- `.or()` does not mutate the original value, so it expects an `Option`
+- `.get_or_insert()` mutates the original value, so it expects only the value
+  that `Option` will hold
 
 ## Additional
 

@@ -293,6 +293,10 @@ fn option_and_then_terse() {
     // remove one level of nesting of Option, and pass the value to
     // another handler
     fn cookable_v2(food: Food) -> Option<Food> {
+        // We can map, and then flatten...
+        //have_recipe(food).map(have_ingredients).flatten()
+
+        // or we can use .and_then which does the same thing
         have_recipe(food).and_then(have_ingredients)
     }
 
@@ -308,6 +312,39 @@ fn option_and_then_terse() {
     eat(cordon_bleu, Day::Monday);
     eat(steak, Day::Tuesday);
     eat(sushi, Day::Wednesday);
+    println!()
+}
+
+fn option_or() {
+    let x = None;
+    let y_eager = x.or(Some(5));
+    #[allow(clippy::unnecessary_lazy_evaluations)]
+    let y_lazy = x.or_else(|| Some(5));
+
+    assert_eq!(y_eager, y_lazy);
+
+    println!("y_eager: {:?}", y_eager);
+    println!("y_lazy: {:?}", y_lazy);
+    println!()
+}
+
+fn option_get_or_insert() {
+    let mut x_eager = None;
+
+    println!("x_eager before: {:?}", x_eager);
+
+    x_eager.get_or_insert(5);
+
+    println!("x_eager after: {:?}", x_eager);
+
+    let mut x_lazy = None;
+
+    println!("x_lazy before: {:?}", x_lazy);
+
+    #[allow(clippy::unnecessary_lazy_evaluations)]
+    x_lazy.get_or_insert_with(|| 5);
+
+    println!("x_lazy after: {:?}", x_lazy);
     println!()
 }
 
@@ -327,4 +364,6 @@ fn main() {
     option_map_terse();
     option_and_then();
     option_and_then_terse();
+    option_or();
+    option_get_or_insert();
 }
