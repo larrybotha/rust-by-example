@@ -456,6 +456,110 @@ fn result_question_mark() {
     println!()
 }
 
+fn multiple_errors_nesting() {
+    use std::num::ParseIntError;
+
+    type ParseIntResult = Result<i32, ParseIntError>;
+
+    // nest the Result in the Option
+    fn double_first(xs: Vec<&str>) -> Option<ParseIntResult> {
+        xs.first().map(|x| x.parse::<i32>().map(|n| n * 2))
+    }
+
+    let xs = vec!["1", "2", "3"];
+    let ys = vec!["foo", "2", "3"];
+
+    println!("double first on xs: {:?}", double_first(xs));
+    println!("double first on ys: {:?}", double_first(ys));
+    println!()
+}
+
+fn multiple_errors_map_or() {
+    fn double_first(xs: Vec<&str>) -> Result<Option<i32>, std::num::ParseIntError> {
+        let option = xs.first().map(|x| x.parse::<i32>().map(|n| n * 2));
+
+        option.map_or(Ok(None), |r| r.map(Some))
+    }
+
+    let xs = vec!["1", "2", "3"];
+    let ys = vec!["foo", "2", "3"];
+
+    println!("double first on xs: {:?}", double_first(xs));
+    println!("double first on ys: {:?}", double_first(ys));
+    println!()
+}
+
+fn multiple_errors_isomorphic_result_option() {
+    use std::num::ParseIntError;
+
+    type OptionResultInt = Option<Result<i32, ParseIntError>>;
+    type ResultOptionInt = Result<Option<i32>, ParseIntError>;
+
+    fn to_result(x: OptionResultInt) -> ResultOptionInt {
+        x.map_or(
+            // if None, return a Result with Ok(None)
+            Ok(None),
+            // otherwise return a Result containing Option
+            |r| r.map(Some),
+        )
+    }
+
+    fn to_option(x: ResultOptionInt) -> OptionResultInt {
+        x.map_or(
+            // if Err, return None
+            None,
+            // otherwise, return the Option containing the result
+            |v| v.map(Ok),
+        )
+    }
+
+    let (some_x, none_x): (OptionResultInt, OptionResultInt) = (Some(Ok(3)), None);
+    println!("some_x: {some_x:?}");
+    println!("none_x: {none_x:?}");
+    let (ok_some_x, ok_none_x) = (to_result(some_x), to_result(none_x));
+    println!("ok_some_x: {ok_some_x:?}");
+    println!("ok_none_x: {ok_none_x:?}\n");
+
+    let ok_y: ResultOptionInt = Ok(Some(5));
+    println!("ok_y: {ok_y:?}");
+    let some_y = to_option(ok_y);
+    println!("some_y: {some_y:?}");
+
+    println!()
+}
+
+fn multiple_errors_custom() {
+    #[derive(Debug, Clone)]
+    struct DoubleError;
+
+    impl std::fmt::Display for DoubleError {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            write!(f, "invalid first item to double")
+        }
+    }
+
+    fn double_first(xs: Vec<&str>) -> Result<i32, DoubleError> {
+        xs.first()
+            // if Err, change the error to DoubleError
+            .ok_or(DoubleError)
+            .and_then(|v| {
+                v.parse::<i32>()
+                    // if ParseIntError, use DoubleError here, too
+                    .map_err(|_| DoubleError)
+                    .map(|n| n * 2)
+            })
+    }
+
+    let xs = vec!["1", "2", "3"];
+    let ys = vec!["foo", "2", "3"];
+    let zs = vec![];
+
+    println!("double first of xs: {:?}", double_first(xs));
+    println!("double first of ys: {:?}", double_first(ys));
+    println!("double first of zs: {:?}", double_first(zs));
+    println!()
+}
+
 fn main() {
     // panic
     panic_example();
@@ -481,4 +585,10 @@ fn main() {
     result_alias();
     result_early_returns();
     result_question_mark();
+
+    // multiple error types
+    multiple_errors_nesting();
+    multiple_errors_map_or();
+    multiple_errors_isomorphic_result_option();
+    multiple_errors_custom();
 }

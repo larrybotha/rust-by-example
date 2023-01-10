@@ -212,6 +212,101 @@ fn gimme_even(x: i32) {
 
   `try!` has been deprecated, and `?` is now the recommended approach
 
+### Multiple error types
+
+- it's convenient when `Option` interacts with `Option`, and `Result` with
+  `Result`, but the need will quickly arise where we need to be able to
+  interact between `Option` and `Result`, and `Result<T, Error1>` and
+  `Result<T, Error2>`:
+
+  ```rust
+  let xs = vec![];
+
+  // index error
+  let invalid_x = xs.first().unwrap();
+
+  // ParseIntError
+  invalid_x.parse::<i32>().unwrap();
+  ```
+
+- the most basic way to handle an `Option` and a `Result` is to _nest_ one
+  inside the other:
+
+  ```rust
+  fn do_the_nest(xs: Vec<&str>) -> Option<Result<i32, std::num::ParseIntError>> {
+    // .first returns an Option
+    xs.first().map(|x| {
+      // .parse returns a result
+      x.parse::<i32>().map(|n| n * 2)
+    })
+  }
+  ```
+
+- one can switch an `Option` and `Result` using `.map_or`, which is eagerly
+  evaluated:
+
+  ```rust
+  let option_result = Some(Ok(5)); // Option<Result<i32, ...>>
+  let result_from_option = option_result.map_or(
+    // if the option contains None, wrap it in Ok
+    Ok(None),
+    // otherwise, map on the result, wrapping its value in an Option
+    |result| result.map(Some)
+  ); // Result<Option<i32>, ...>
+  let option_from_result = result_from_option.map_or(
+    // if the Result is Err, return None
+    None,
+    // otherwise, map on the Option, wrapping its value in Result
+    |option| option.map(Ok)
+  ); // Option<Result<i32, ...>>
+  ```
+
+- `.map_or` is similar to Python's `.get`, where an non-existent value in a `Dict`
+  can be provided with a default
+
+#### Defining an error type
+
+- a good error in Rust:
+  - represents different errors with the same type
+  - has a good UX for users
+  - is easy to compare to other error types
+    - e.g. `Err(EmptyVec)` is preferred over `Err("Please use a vector with at least on element".to_owned())`
+  - can hold information about the error
+    - e.g. `Err(BadChar(c, position))` vs `Err("+ cannot be used here".to_owned())`
+  - composes well with other errors
+- a custom error in Rust is defined with a unit struct:
+
+  ```rust
+  #[derive(Debug, Clone)]
+  struct MyCustomError;
+  ```
+
+- creating errors is a separate concern to displaying errors:
+
+  ```rust
+  #[derive(Debug, Clone)]
+  struct MyCustomError;
+
+  impl std::fmt::Display for MyCustomError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+      write!(f, "invalid use of the thing")
+    }
+  }
+  ```
+
+- using `Result::ok_or` and `Option::map_err` we can change the error type while
+  processing a value:
+
+  ```rust
+  let first_doubled = vec!["1", "2", "3"].first()
+                .ok_or(MyCustomError)
+                .and_then(|x| {
+                  x.parse::<i32>()
+                    .map_err(|_| MyCustomError)
+                    .map(|n| n * 2)
+                });
+  ```
+
 ## Additional
 
 - `not` can be used in attributes:
