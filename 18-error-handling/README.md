@@ -307,6 +307,9 @@ fn gimme_even(x: i32) {
                 });
   ```
 
+  In Haskell this is known as _type constructor flipping_ or _type constructor
+  reversal_
+
 ## Additional
 
 - `not` can be used in attributes:
