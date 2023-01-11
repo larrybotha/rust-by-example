@@ -22,11 +22,15 @@ Learning and annotations from the [Rust By Example book](https://doc.rust-lang.o
 - [Scoping Rules](./15-scoping-rules)
 - [Traits](./16-traits)
 - [macro_rules!](./17-macro-rules)
+- [Error Handling](./18-error-handling)
 
 ## Links and resources
 
 - [A half hour to learn Rust](https://fasterthanli.me/articles/a-half-hour-to-learn-rust)
 - [Learn Rust The Dangerous Way](http://cliffle.com/p/dangerust/)
+- [Elements of Rust](https://github.com/ferrous-systems/elements-of-rust)
+- [Idiomatic Rust](https://github.com/mre/idiomatic-rust)
+- [Awesome Rust](https://awesome-rust.com/)
 
 ## TODO
 
