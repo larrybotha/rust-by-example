@@ -275,12 +275,10 @@ fn gimme_even(x: i32) {
     - e.g. `Err(BadChar(c, position))` vs `Err("+ cannot be used here".to_owned())`
   - composes well with other errors
 - a custom error in Rust is defined with a unit struct:
-
   ```rust
   #[derive(Debug, Clone)]
   struct MyCustomError;
   ```
-
 - creating errors is a separate concern to displaying errors:
 
   ```rust
@@ -296,7 +294,6 @@ fn gimme_even(x: i32) {
 
 - using `Result::ok_or` and `Option::map_err` we can change the error type while
   processing a value:
-
   ```rust
   let first_doubled = vec!["1", "2", "3"].first()
                 .ok_or(MyCustomError)
@@ -306,9 +303,97 @@ fn gimme_even(x: i32) {
                     .map(|n| n * 2)
                 });
   ```
-
   In Haskell this is known as _type constructor flipping_ or _type constructor
   reversal_
+
+#### Boxing errors
+
+- code can be simplified by `Box`ing errors. This allows for preserving the
+  original errors, but it comes at the expense of error types only being known
+  at runtime, instead of being statically determined:
+
+  ```rust
+  // Create an alias of Result, where the error is wrapped by Box.
+  // Any value that implements Error will be converted via Box::From
+  type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
+
+  #[derive(Debug, Clone)]
+  struct MyError;
+
+  // add error message
+  impl std::fmt::Display for MyError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+      write!(f, "Ooops, something ain't right")
+    }
+  }
+
+  // implement error
+  impl std::error::Error for MyError {}
+
+  let my_result: Result<i32> = vec::<&str>![].first()
+    // use our custom error, converting the error into Box<MyError>
+    .map_or_else(|| MyError.into())
+    .and_then(|s| {
+      s.parse::<i32>()
+        // convert whatever error str::parse raises to the Box'd version
+        .map_or(|e| e.into())
+        .map(|n| n * 2)
+    });
+  ```
+
+#### Other uses of `?`
+
+- `?` was previously described as `.unwrap` or `return Err(err)` - it's more
+  accurately described by `.unwrap` or `return Err(From::from(err))` - it will
+  convert any error to the expected return type
+- instead of having to use `my_option.ok_or_else` or `my_result.map_err` with
+  `.into()` to convert errors to the expected return types, one can use `?`
+  to do the heavy lifting:
+
+  ```rust
+  fn option_thinger(xs: Vec<i32>) -> Result<i32, Box<dyn error::Error>> {
+    // let first = xs.first().ok_or_else(|| MyCustomError);
+    let first = xs.first()
+      // convert to Result, and then unwrap, or return the error type as per
+      // the function signature
+      .ok_or(MyCustomError)?; // '?' will convert for us here
+
+    Ok(first)
+  }
+
+  fn result_thinger(x: &str) -> Result<i32, Box<dyn error::Error>> {
+    // '?' here will convert the parse error to the type of error as defined
+    // by the function signature
+    let n = x.parse::<i32>()?;
+
+    Ok(n)
+  }
+  ```
+
+#### Wrapping errors
+
+- instead of boxing errors, we could return them in our own error type, defined
+  by an enum
+- to do this:
+  - create an enum for the custom error, with variants for the different types
+    of errors
+  - implement `std::fmt::Display` for the enum
+  - implement `std::error::Error` for the enum
+    - for any of the variants that wrap another error, retain that error by
+      returning it in a `Some`
+  - in order for `.into` or `From::from(err)` to convert from some error into
+    one of our error variants, implement `From<OriginalErrorType>` for each
+    wrapped error contained in the enum
+
+### Iterating over `Result`s
+
+- `some_iter.map` may fail, in which case we have a few ways of handling the
+  error:
+  - use `.collect` and let the error occur
+  - filter out the errors
+  - store the errors
+  - partition the iterator, returning a tuple containing the passed and failed
+    values
 
 ## Additional
 
@@ -360,3 +445,50 @@ fn gimme_even(x: i32) {
     // ...
   }
   ```
+
+- `A.into()`, where `A` is converted to type `B` can also be written
+  `B::from(value)`. The convenience is that we don't need to know what `B` is -
+  Rust will do the conversion for us, allowing `B` to be changed without having
+  to change locations where `.into()` has been used - we know we have `A`, and
+  it will be converted into _something_ else
+- when aliasing `Result`, one needs to specify `std::result::Result` in order to
+  prevent a circular dependency:
+
+  ```rust
+  type Result<T> = std::result::Result<T, SomeType>;
+  ```
+
+- `Option::ok_or` transforms an `Option` into a `Result`, so to extract a value,
+  or return an `Err` from an `Option`:
+
+  ```rust
+  let get_result(x: Option<i32>) -> Result<i32> {
+    let value = x.ok_or(MyError)?;
+
+    value
+  }
+  ```
+
+- `my_iterator.partition` accepts a predicate, and results in a tuple of the
+  passing and failing values. In Javascript, it would likely be analogous to:
+
+  ```javascript
+  const [passing, failing] = xs.reduce(
+    (acc, x) => {
+      let [passes, failures] = acc;
+
+      if (x) {
+        passes = [...passes, x];
+      } else {
+        failures = [...failures, x];
+      }
+
+      return [passes, failures];
+    },
+    [[], []]
+  );
+  ```
+
+- `Result::unwrap_err` is analogous to `Result::unwrap`, except that:
+  - it unwraps the values contained in the `Err` variant
+  - it `panic`s if it encounters an `Ok`

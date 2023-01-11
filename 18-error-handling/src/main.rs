@@ -560,6 +560,220 @@ fn multiple_errors_custom() {
     println!()
 }
 
+fn multiple_errors_boxing() {
+    use std::error;
+    use std::fmt;
+
+    // Result is now aliased to a result where the error is _something_
+    // that implements the error::Error trait - Box::From will be used
+    // to convert whatever type needs to be converted to Box<T>, as long
+    // as it implements Error
+    type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
+
+    #[derive(Debug, Clone)]
+    struct EmptyVec;
+
+    impl fmt::Display for EmptyVec {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write!(f, "Invalid first item to double")
+        }
+    }
+
+    // EmptyVec needs to implement error::Error in order for us to use
+    // it in our aliased Result
+    impl error::Error for EmptyVec {}
+
+    fn double_first(xs: Vec<&str>) -> Result<i32> {
+        xs.first()
+            // 1 - convert the Option to Result
+            // 2 - if the value was None, convert EmptyVec into Box<EmptyVec>
+            .ok_or_else(|| EmptyVec.into())
+            // equivalent to:
+            //.ok_or_else(|| Box::from(EmptyVec))
+            .and_then(|s| {
+                s.parse::<i32>()
+                    // Box whatever error str::parse raises
+                    .map_err(|e| e.into())
+                    // equivalent to:
+                    //.map_err(Box::from)
+                    .map(|n| n * 2)
+            })
+    }
+
+    let xs = vec!["1", "2", "3"];
+    let ys = vec!["foo", "2", "3"];
+    let zs = vec![];
+
+    println!("xs with first doubled: {:?}", double_first(xs));
+    println!("ys with first doubled: {:?}", double_first(ys));
+    println!("zs with first doubled: {:?}", double_first(zs));
+    println!()
+}
+
+fn multiple_errors_boxing_question_mark() {
+    use std::error;
+    use std::fmt;
+
+    type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
+
+    #[derive(Debug, Clone)]
+    struct EmptyVec;
+
+    impl fmt::Display for EmptyVec {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write!(f, "Invalid first item to double")
+        }
+    }
+
+    impl error::Error for EmptyVec {}
+
+    fn double_first(xs: Vec<&str>) -> Result<i32> {
+        // 1 - get the first value
+        // 2 - convert the option to a result
+        // 3 - unwrap the result, or return Err(EmptyVec)
+        let first = xs.first().ok_or(EmptyVec)?;
+        // 1 - parse the string as i32
+        // 2 - unwrap the result, or return Err(e)
+        // The ? here uses Err(From::from(e)) to convert the error into the
+        // expected return type, which in this case is Box<dyn error::Error> -
+        // a Box containing some type that implements error::Error
+        let n = first.parse::<i32>()?;
+
+        Ok(n * 2)
+    }
+
+    let xs = vec!["1", "2", "3"];
+    let ys = vec!["foo", "2", "3"];
+    let zs = vec![];
+
+    println!("xs with doubled first: {:?}", double_first(xs));
+    println!("ys with doubled first: {:?}", double_first(ys));
+    println!("zs with doubled first: {:?}", double_first(zs));
+    println!()
+}
+
+fn multiple_errors_wrapping() {
+    use std::error;
+    use std::fmt;
+    use std::num::ParseIntError;
+
+    type Result<T> = std::result::Result<T, DoubleError>;
+
+    #[derive(Debug, Clone)]
+    enum DoubleError {
+        EmptyVec,
+        Parse(ParseIntError),
+    }
+
+    impl fmt::Display for DoubleError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            match *self {
+                Self::EmptyVec => write!(f, "Vector supplied without any elements"),
+                Self::Parse(..) => write!(f, "Unable to parse value to int"),
+            }
+        }
+    }
+
+    // implement the low-level source for DoubleError, given that it's an enum,
+    // and we could experience one of many errors
+    impl error::Error for DoubleError {
+        fn source(&self) -> Option<&(dyn error::Error + 'static)> {
+            match *self {
+                Self::EmptyVec => None,
+                // if we have Parse error, retain the detail of that error
+                // by wrapping it in Some
+                Self::Parse(ref e) => Some(e),
+            }
+        }
+    }
+
+    // in order for ParseIntError to be converted to DoubleError, we need
+    // to explicitly handle it by implementing From when we have a ParseIntError
+    impl From<ParseIntError> for DoubleError {
+        fn from(value: ParseIntError) -> Self {
+            DoubleError::Parse(value)
+        }
+    }
+
+    fn double_first(xs: Vec<&str>) -> Result<i32> {
+        let first = xs.first().ok_or(DoubleError::EmptyVec)?;
+        let n = first.parse::<i32>()?;
+
+        Ok(n * 2)
+    }
+
+    let xs = vec!["1", "2", "3"];
+    let ys = vec!["foo", "2", "3"];
+    let zs = vec![];
+
+    println!("xs with doubled first: {:?}", double_first(xs));
+    println!("ys with doubled first: {:?}", double_first(ys));
+    println!("zs with doubled first: {:?}", double_first(zs));
+    println!()
+}
+
+fn iterating_over_results_collect_and_fail() {
+    let xs = vec!["foo", "1"];
+    let oops = std::panic::catch_unwind(|| {
+        let result: Vec<_> = xs.into_iter().map(|s| s.parse::<i32>()).collect();
+
+        result
+    });
+
+    println!("{oops:?}");
+    println!()
+}
+
+fn iterating_over_results_filter_and_ignore() {
+    let xs = vec!["foo", "2"];
+    let ys: Vec<i32> = xs.iter().filter_map(|s| s.parse::<i32>().ok()).collect();
+
+    println!("xs: {xs:?}");
+    println!("ys: {ys:?}");
+    println!()
+}
+
+fn iterating_over_results_store_errors() {
+    let mut errors = vec![];
+    let xs = vec!["foo", "1"];
+    let ys: Vec<i32> = xs
+        .iter()
+        // map values to Result<i32>
+        .map(|s| s.parse::<i32>())
+        // filter out non-Ok values, pushing the errors onto our vector
+        .filter_map(|r| r.map_err(|e| errors.push(e)).ok())
+        // convert the iterator into a vector
+        .collect();
+
+    println!("errors: {errors:?}");
+    println!("xs: {xs:?}");
+    println!("ys: {ys:?}");
+    println!()
+}
+
+fn iterating_over_results_partition() {
+    let xs = vec!["foo", "1"];
+    let (success_results, error_results): (Vec<_>, Vec<_>) = xs
+        .iter()
+        // parse each value, returning a Result
+        .map(|s| s.parse::<i32>())
+        // partition the Results, using Result::is_ok to either return
+        .partition(Result::is_ok);
+    let (ys, errors): (Vec<i32>, Vec<_>) = (
+        // unwrap the success results - we know that none of these values are
+        // Err, so it's safe for us to use .unwrap here
+        success_results.into_iter().map(Result::unwrap).collect(),
+        // unwrap the error results. If any of these values were Ok, .unwrap_err
+        // would panic, but we're guaranteed to have only Err values here
+        error_results.into_iter().map(Result::unwrap_err).collect(),
+    );
+
+    println!("errors: {errors:?}");
+    println!("xs: {xs:?}");
+    println!("ys: {ys:?}");
+    println!()
+}
+
 fn main() {
     // panic
     panic_example();
@@ -591,4 +805,13 @@ fn main() {
     multiple_errors_map_or();
     multiple_errors_isomorphic_result_option();
     multiple_errors_custom();
+    multiple_errors_boxing();
+    multiple_errors_boxing_question_mark();
+    multiple_errors_wrapping();
+
+    // iterating over `Result`s
+    iterating_over_results_collect_and_fail();
+    iterating_over_results_filter_and_ignore();
+    iterating_over_results_store_errors();
+    iterating_over_results_partition();
 }
