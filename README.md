@@ -23,6 +23,7 @@ Learning and annotations from the [Rust By Example book](https://doc.rust-lang.o
 - [Traits](./16-traits)
 - [macro_rules!](./17-macro-rules)
 - [Error Handling](./18-error-handling)
+- [Std library types](./19-std-library-types)
 
 ## Links and resources
 
