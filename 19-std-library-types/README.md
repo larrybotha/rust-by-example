@@ -20,6 +20,21 @@
 - a `Box`d value can be dereferenced using `*`, which removes only 1 layer of
   indirection
 
+### Vectors
+
+- like slices, the size of a vector is not known at compile time
+- unlike slices, a vector can grow dynamically
+- a vector is described by 3 pieces of information:
+  - a pointer to the data
+  - capacity - how many values the vector can hold, i.e. how much memory is
+    reserved for the vector
+  - size - how many values the vector is currently holding
+- when a vector grows beyond its capacity, it is assigned a larger capacity and
+  all of its items may be moved to a new location in memory to maintain
+  contiguity of their location in memory
+- [`Vec` vs slice](https://stackoverflow.com/questions/32571441/what-is-the-difference-between-storing-a-vec-vs-a-slice)
+- [Arrays, Vectors, and Slices](https://hashrust.com/blog/arrays-vectors-and-slices-in-rust/)
+
 ## Additional
 
 - to determine the number of bytes a value occupies on the stack, one can use
@@ -31,4 +46,12 @@
   let x = 5;
 
   println!("x occupies {} bytes on the stack", mem::size_of_val(&x));
+  ```
+
+- the address of values can be inspected using `{:p}`:
+
+  ```rust
+  let xs = vec![1,2,3];
+
+  println!("address of xs[0]: {:p}", &xs[0]);
   ```

@@ -69,6 +69,28 @@ fn boxed_values() {
     println!()
 }
 
+fn vector_element_addresses() {
+    let mut xs = vec![1, 2, 3, 4];
+
+    // capacity here is 4
+    println!("xs capacity: {}", xs.capacity());
+    println!("xs[0] address: {:p}", &xs[0]);
+
+    xs.push(5);
+
+    // capacity here is 8
+    println!("xs capacity: {}", xs.capacity());
+    // address of element has changed
+    println!("xs[0] address: {:p}", &xs[0]);
+    println!();
+
+    println!("memory locations of each item are contiguous:");
+    xs.iter().map(|x| println!("{:p}", x)).for_each(drop);
+
+    println!()
+}
+
 fn main() {
     boxed_values();
+    vector_element_addresses();
 }
