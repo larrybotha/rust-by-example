@@ -90,7 +90,121 @@ fn vector_element_addresses() {
     println!()
 }
 
+fn vector_from_iterator() {
+    let iter = 0..10;
+    let xs: Vec<i32> = iter.collect();
+
+    println!("xs: {:?}", xs);
+    println!()
+}
+
+fn vector_push_pop() {
+    let mut xs = vec![1, 2, 3];
+
+    println!("xs before: {:?}", xs);
+
+    xs.push(4);
+
+    println!("xs after push: {:?}", xs);
+
+    let x = xs.pop();
+
+    println!("xs after pop: {:?}", xs);
+    println!("x from pop: {:?}", x);
+    println!()
+}
+
+fn vector_pop_empty() {
+    let mut xs: Vec<i32> = Vec::new();
+    let x = xs.pop();
+    let y = Vec::pop(&mut xs); // popping via struct definition
+
+    assert_eq!(x, None);
+    println!("x from empty vec with length {}: {:?}", xs.len(), x);
+    println!("y from empty vec with length {}: {:?}", xs.len(), y);
+    println!()
+}
+
+fn vector_out_of_bounds_panics() {
+    use std::panic;
+
+    let xs: Vec<i32> = vec![];
+    let panic_result = panic::catch_unwind(|| xs[0]);
+
+    println!("xs out of bounds panid result: {:?}", panic_result);
+    println!()
+}
+
+fn vector_for_iteration() {
+    let xs = vec![1, 2, 3];
+
+    for x in xs.iter() {
+        println!("x: {}", x);
+    }
+    println!()
+}
+
+fn vector_for_enumeration() {
+    let xs = (100..103).collect::<Vec<i32>>();
+
+    for (i, x) in xs.iter().enumerate() {
+        println!("x in xs at position {}: {}", i, x);
+    }
+
+    println!()
+}
+
+fn vector_map_enumeration() {
+    let xs = (0..10).collect::<Vec<i32>>();
+    let ys = xs
+        .iter()
+        .enumerate()
+        .map(|(i, x)| (i, *x * (i as i32)))
+        .collect::<Vec<(usize, i32)>>();
+
+    ys.iter()
+        .map(|(i, x)| println!("(i, x): ({}, {})", i, x))
+        .for_each(drop);
+    println!()
+}
+
+fn vector_mutable_iteration() {
+    fn print_vec(xs: &[i32]) {
+        xs.iter()
+            .enumerate()
+            .map(|(i, x)| println!("xs at {}: {}", i, x))
+            .for_each(drop);
+    }
+
+    let mut xs = vec![1, 2, 3];
+
+    println!("mutably iterate without .iter_mut:");
+    xs = xs.iter().map(|x| i32::pow(*x, 2)).collect::<Vec<i32>>();
+
+    print_vec(&xs);
+
+    println!("\nmutably iterate with for and .iter_mut:");
+
+    for x in xs.iter_mut() {
+        *x = i32::pow(*x, 2);
+    }
+
+    print_vec(&xs);
+
+    println!();
+}
+
 fn main() {
     boxed_values();
+
+    // vectors
     vector_element_addresses();
+    vector_from_iterator();
+    vector_push_pop();
+    vector_pop_empty();
+    vector_out_of_bounds_panics();
+    vector_for_iteration();
+    vector_for_enumeration();
+    vector_map_enumeration();
+    vector_mutable_iteration();
 }
