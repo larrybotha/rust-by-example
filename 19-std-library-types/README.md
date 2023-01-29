@@ -68,6 +68,43 @@
 - [`Vec` vs slice](https://stackoverflow.com/questions/32571441/what-is-the-difference-between-storing-a-vec-vs-a-slice)
 - [Arrays, Vectors, and Slices](https://hashrust.com/blog/arrays-vectors-and-slices-in-rust/)
 
+### Strings
+
+- Rust has two types of strings:
+  - `String`, which is heap-allocated, and represents a `Vec<u8>`
+  - `&str`, which is a reference to stack-allocated `[u8]`, which is also known
+    an as a string slice
+- `String` and `&str` are always guaranteed to contain UTF-8 characters
+- `String` and `&str` have various `.split_` methods, which convert the strings
+  into iterators
+- `str::chars` will return a `Char` which is an iterator over `char`
+- backslashes are used to escape characters in strings. The [Tokens](https://doc.rust-lang.org/reference/tokens.html)
+  in the book covers techniques for escaping
+
+### `Option`
+
+- `Option` allows for capturing errors in a program without calling `panic!`
+
+### `Result`
+
+- `Option` helps in showing _that_ there was an error, but `Result` allows for
+  us to describe _how_ it errored using the `Err` enum
+- chaining a result with `?` will unwrap the result and do one of two things:
+  - if the result is `Ok`:
+    - unwrap the value
+    - allow the function to continue executing
+  - if the result is `Err`, the function will bail with that `Err`
+
+### `panic!`
+
+- the `panic!` macro can be used to generate a panic and start unwinding the
+  stack, freeing any memory allocated by the thread where the panic was
+  generated. Each object that was allocated will have its own destructor called,
+  until all allocations are freed
+- single-threaded applications that panic will report the panic and exit
+- [valgrind](https://valgrind.org/) can be used to evaluate whether an
+  executable has freed memory or not once it has exited
+
 ## Additional
 
 - to determine the number of bytes a value occupies on the stack, one can use
@@ -87,4 +124,11 @@
   let xs = vec![1,2,3];
 
   println!("address of xs[0]: {:p}", &xs[0]);
+  ```
+
+- `Vec::sort` and `Vec::dedup` are useful methods on `Vec`
+- assigning `None` to a variable requires the type to be explicitly annotated:
+
+  ```rust
+  let none_int = None::<i32>;
   ```

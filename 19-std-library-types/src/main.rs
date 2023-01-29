@@ -194,6 +194,178 @@ fn vector_mutable_iteration() {
     println!();
 }
 
+fn string_slice_explicit_type() {
+    let x: &'static str = "hello, world!";
+
+    println!("x is a reference to a string with a static lifetime:\n{x}");
+    println!("x's pointer to its memory location: {:?}", x.as_ptr());
+    println!("x as bytes: {:?}", x.as_bytes());
+    println!()
+}
+
+fn string_split() {
+    fn reverse_print(xs: &str) {
+        xs.split_whitespace()
+            .rev()
+            .enumerate()
+            .map(|(index, word)| println!("index: {index}, word: {word}"))
+            .for_each(drop);
+
+        println!()
+    }
+
+    let string_slice = "The quick brown fox";
+    let string = String::from(string_slice);
+
+    reverse_print(string_slice);
+    reverse_print(&string);
+}
+
+fn string_chars() {
+    let sentence = "foo bar";
+    let chars_iterator = sentence.chars();
+    let mut chars_vec: Vec<char> = chars_iterator.collect();
+
+    println!("chars_vec: {chars_vec:?}");
+
+    chars_vec.sort();
+
+    println!("chars_vec sorted: {chars_vec:?}");
+
+    chars_vec.dedup();
+
+    println!("chars_vec deduped: {chars_vec:?}");
+
+    println!()
+}
+
+fn string_is_growable() {
+    let original_sentence = "foo bar";
+    let mut chars: Vec<char> = original_sentence.chars().collect();
+
+    chars.sort();
+    chars.dedup();
+
+    let mut growable_string = String::new();
+
+    for c in chars {
+        growable_string.push(c);
+    }
+
+    let chars_to_trim: &[char] = &[' '];
+    let slice = growable_string.trim_matches(chars_to_trim);
+
+    println!("slice: {slice:?}");
+    println!()
+}
+
+fn string_replace() {
+    let x = "I like dogs";
+    let y = x.replace("dog", "cat");
+
+    println!("x: {x}");
+    println!("y: {y}");
+    println!()
+}
+
+fn string_escaping() {
+    let escaped = "\"Hey,\" he said";
+
+    println!("escaped: {escaped}");
+    println!()
+}
+
+fn option_example() {
+    fn checked_division(numerator: f64, divisor: f64) -> Option<f64> {
+        if divisor == 0.into() {
+            None
+        } else {
+            Some(numerator / divisor)
+        }
+    }
+
+    fn try_divide(numerator: f64, divisor: f64) {
+        match checked_division(numerator, divisor) {
+            None => println!("failed: attempted to divide by zero"),
+            Some(n) => println!("succeeded: {numerator} / {divisor} = {n}"),
+        }
+    }
+
+    try_divide(1.0, 0.0);
+    try_divide(1.0, 2.0);
+
+    println!()
+}
+
+fn result_example() {
+    mod checked {
+        #[derive(Debug)]
+        pub enum MathError {
+            DivisionByZero,
+            NegativeSquareRoot,
+            NonPositiveLogarithm,
+        }
+
+        pub type MathResult = Result<f64, MathError>;
+
+        pub fn div(x: f64, y: f64) -> MathResult {
+            if y == 0.0 {
+                Err(MathError::DivisionByZero)
+            } else {
+                Ok(x / y)
+            }
+        }
+
+        pub fn sqrt(x: f64) -> MathResult {
+            if x < 0.0 {
+                Err(MathError::NegativeSquareRoot)
+            } else {
+                Ok(x.sqrt())
+            }
+        }
+
+        pub fn ln(x: f64) -> MathResult {
+            if x <= 0.0 {
+                Err(MathError::NonPositiveLogarithm)
+            } else {
+                Ok(x.ln())
+            }
+        }
+    }
+
+    let x = 2.0;
+    let y = 4.0;
+
+    println!("div(x, y) = {:?}", checked::div(x, y));
+    println!("div(x, 0.0) = {:?}", checked::div(x, 0.0));
+    println!("sqrt(x) = {:?}", checked::sqrt(x));
+    println!("sqrt(-1.0) = {:?}", checked::sqrt(-1.0));
+    println!("ln(x) = {:?}", checked::ln(x));
+    println!("ln(0.0) = {:?}", checked::ln(0.0));
+    println!()
+}
+
+fn result_question_mark() {
+    #[derive(Debug)]
+    struct MyError;
+
+    type MyResult = Result<i32, MyError>;
+
+    fn try_double(x: MyResult) -> MyResult {
+        // unwrap the value using ?
+        let value = x?;
+
+        Ok(value * 2)
+    }
+
+    let x: MyResult = Ok(2);
+
+    println!("x: {x:?}");
+    println!("x doubled: {:?}", try_double(x));
+    println!("error doubled: {:?}", try_double(Err(MyError)));
+    println!()
+}
+
 fn main() {
     boxed_values();
 
@@ -207,4 +379,19 @@ fn main() {
     vector_for_enumeration();
     vector_map_enumeration();
     vector_mutable_iteration();
+
+    // strings
+    string_slice_explicit_type();
+    string_split();
+    string_chars();
+    string_is_growable();
+    string_replace();
+    string_escaping();
+
+    // option
+    option_example();
+
+    // result
+    result_example();
+    result_question_mark();
 }
