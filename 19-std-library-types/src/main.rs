@@ -366,6 +366,86 @@ fn result_question_mark() {
     println!()
 }
 
+fn hashmap_capacity() {
+    use std::collections::HashMap;
+
+    let hash_map_from_new: HashMap<String, i32> = HashMap::new();
+    let hash_map_from_cap: HashMap<String, i32> = HashMap::with_capacity(6);
+
+    println!("hash_map_from_new: {:?}", hash_map_from_new);
+    println!(
+        "hash_map_from_new capacity: {}",
+        hash_map_from_new.capacity()
+    );
+    println!("hash_map_from_new length: {}\n", hash_map_from_new.len());
+
+    println!("hash_map_from_cap: {:?}", hash_map_from_cap);
+    println!(
+        "hash_map_from_cap capacity: {}",
+        hash_map_from_cap.capacity()
+    );
+    println!("hash_map_from_cap length: {}\n", hash_map_from_cap.len());
+}
+
+fn hashmap_interactions() {
+    use std::collections::HashMap;
+
+    let mut hm = HashMap::new();
+
+    hm.insert("foo", "bar");
+    hm.insert("baz", "quux");
+
+    match hm.get("foo") {
+        Some(v) => println!("got {v} at key 'foo'"),
+        None => println!("nothing at key 'foo'"),
+    }
+
+    match hm.get("boo") {
+        Some(v) => println!("got {v} at key 'boo'"),
+        None => println!("nothing at key 'boo'"),
+    }
+
+    let remove_key = "foo";
+    // removing a value returns an Option
+    let removed_value = hm.remove(&remove_key);
+
+    assert_eq!(removed_value, Some("bar"));
+    println!("removed value at key {remove_key}: {removed_value:?}");
+
+    let removed_value = hm.remove_entry(&remove_key);
+
+    assert_eq!(removed_value, None);
+    println!("removed value at key {remove_key} again: {removed_value:?}\n");
+
+    // iterating
+    hm.iter()
+        .map(|(key, value)| println!("key: {key}, value: {value}"))
+        .for_each(drop);
+
+    println!()
+}
+
+fn hash_map_string_str() {
+    use std::collections::HashMap;
+
+    let mut hash_map = HashMap::new();
+
+    // build the HashMap with as HashMap<String, usize>
+    vec!["a", "b", "c", "d", "e"]
+        .iter()
+        .enumerate()
+        .map(|(index, value)| hash_map.insert(value.to_string(), index))
+        .for_each(drop);
+
+    // We can access items in the hashmap using &str - no need to use String!
+    let maybe_a = hash_map.get("a");
+
+    assert_eq!(maybe_a, Some(&0_usize));
+    println!("the value at 'a' is: {maybe_a:?}");
+
+    println!()
+}
+
 fn main() {
     boxed_values();
 
@@ -394,4 +474,9 @@ fn main() {
     // result
     result_example();
     result_question_mark();
+
+    // hashmap
+    hashmap_capacity();
+    hashmap_interactions();
+    hash_map_string_str();
 }

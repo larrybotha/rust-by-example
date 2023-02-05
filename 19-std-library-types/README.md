@@ -105,6 +105,56 @@
 - [valgrind](https://valgrind.org/) can be used to evaluate whether an
   executable has freed memory or not once it has exited
 
+### `HashMap`
+
+- `HashMap`s store values by key, similar to dicts in Python, and objects in
+  Javascript
+- a key in a `HashMap` may be any type that implements the `Eq` and `Hash`
+  traits
+- `HashMaps` are heap-allocated, and thus growable, like vectors
+- `HashMaps`, unlike vectors, can also shrink when they have excess capacity
+- one can define a `HashMap` with a starting capacity, but the docs recommend
+  allowing capacity to be managed dynamically:
+
+  ```rust
+  use std::collections::HashMap;
+
+  let defined_cap = HashMap::with_capacity(6);
+  let dynamic_cap = HashMap::new(); // better
+  ```
+
+- retrieving values from a `HashMap` returns an `Option`:
+
+  ```rust
+  use std::collections::HashMap;
+
+  let hash_map = HashMap::new();
+
+  hash_map.insert("a", "b");
+
+  match hash_map.get(&"a") {
+    Some(v) => println!("got {v}"),
+    None => println!("got nothing")
+  }
+  ```
+
+- removing values works similarly:
+
+  ```rust
+  use std::collections::HashMap;
+
+  let hash_map = HashMap::new();
+
+  hash_map.insert(1, "a");
+
+  let removed_value = hash_map.remove(&1);
+
+  assert_eq!(removed_value, Some("a"));
+  ```
+
+- `HashMap::iter` can be used to iterate over a `HashMap`, and similarly to
+  Python's dicts, iterates over tuples of key-value pairs
+
 ## Additional
 
 - to determine the number of bytes a value occupies on the stack, one can use
