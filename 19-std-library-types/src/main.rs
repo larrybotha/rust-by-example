@@ -434,7 +434,7 @@ fn hash_map_string_str() {
     vec!["a", "b", "c", "d", "e"]
         .iter()
         .enumerate()
-        .map(|(index, value)| hash_map.insert(value.to_string(), index))
+        .map(|(index, &value)| hash_map.insert(value.to_string(), index))
         .for_each(drop);
 
     // We can access items in the hashmap using &str - no need to use String!
@@ -442,6 +442,34 @@ fn hash_map_string_str() {
 
     assert_eq!(maybe_a, Some(&0_usize));
     println!("the value at 'a' is: {maybe_a:?}");
+
+    println!()
+}
+
+fn hash_primitive_keys() {
+    use std::collections::HashMap;
+
+    let mut bool_map = HashMap::new();
+    let mut int_map = HashMap::new();
+    let mut str_map = HashMap::new();
+    let mut string_map = HashMap::new();
+
+    vec!["a", "b", "c"]
+        .iter()
+        .enumerate()
+        // destructure &&str to &str here
+        .map(|(index, &value)| {
+            bool_map.insert(index % 2 != 0, index % 2);
+            int_map.insert(index, index + 1);
+            str_map.insert(value, index);
+            string_map.insert(value.to_string(), index + 1);
+        })
+        .for_each(drop);
+
+    println!("str_map: {str_map:#?}");
+    println!("string_map: {string_map:#?}");
+    println!("bool_map: {bool_map:#?}");
+    println!("int_map: {int_map:#?}");
 
     println!()
 }
@@ -479,4 +507,5 @@ fn main() {
     hashmap_capacity();
     hashmap_interactions();
     hash_map_string_str();
+    hash_primitive_keys();
 }

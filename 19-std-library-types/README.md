@@ -155,6 +155,16 @@
 - `HashMap::iter` can be used to iterate over a `HashMap`, and similarly to
   Python's dicts, iterates over tuples of key-value pairs
 
+#### Custom keys
+
+- any value that implements `Eq` and `Hash` can be used as a key for a
+  `HashMap`:
+  - `bool`
+  - integers
+  - `&str` and `String`
+- `f32` and `f64` don't implement `Hash`, and so can't be used as keys (unless
+  one implements `Hash`...?)
+
 ## Additional
 
 - to determine the number of bytes a value occupies on the stack, one can use
