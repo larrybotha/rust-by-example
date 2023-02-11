@@ -164,6 +164,18 @@
   - `&str` and `String`
 - `f32` and `f64` don't implement `Hash`, and so can't be used as keys (unless
   one implements `Hash`...?)
+- all collections whose types implement `PartialEq`, `Eq` and `Hash` are
+  hashable, e.g.:
+
+  ```rust
+  use std::collections::HashMap;
+
+  let xs = vec![1,2,3];
+  let mut hash_map = HashMap::new();
+
+  hash_map.insert(xs, 0);
+  // => {[1,2,3]: 0}
+  ```
 
 ## Additional
 
@@ -191,4 +203,32 @@
 
   ```rust
   let none_int = None::<i32>;
+  ```
+
+- Rust discourages manually dereferencing values in an iterator by providing a
+  `Iterator::copied` method that will perform the same task:
+
+  ```rust
+  let xs = vec±[1,2,3];
+  let sum_imperative = xs.iter()
+    // manuualy dereference - discouraged
+    .map(|x| *x)
+    .reduce(|acc, x| acc + x);
+  let sum_declarative = xs.iter()
+    // let Rust dereference
+    .copied()
+    .reduce(|acc, x| acc + x);
+
+  ```
+
+- `Iterator::fold` is analogous to `Array.reduce` in Javascript -
+  `Iterator::reduce`, however, returns an `Option`:
+
+  ```rust
+  let xs = vec![1,2,3];
+  let maybe_sum: Option<i32> = xs.iter().copied().reduce(|acc, x| acc + x);
+  // Rust suggests using `sum` here, too
+  let sum = xs.iter().fold(0, |acc, x| acc + x);
+
+  assert_eq!(Some(sum), maybe_sum);
   ```

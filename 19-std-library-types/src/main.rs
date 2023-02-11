@@ -466,11 +466,99 @@ fn hash_primitive_keys() {
         })
         .for_each(drop);
 
-    println!("str_map: {str_map:#?}");
-    println!("string_map: {string_map:#?}");
     println!("bool_map: {bool_map:#?}");
     println!("int_map: {int_map:#?}");
+    println!("str_map: {str_map:#?}");
+    println!("string_map: {string_map:#?}");
 
+    println!()
+}
+
+fn hash_collection() {
+    use std::collections::HashMap;
+
+    type IntVec = Vec<i32>;
+    // IntVec can be a key, because i32 implements Hash and Eq
+    type IntVecHashMap = HashMap<IntVec, i32>;
+
+    let mut hash_map: IntVecHashMap = HashMap::new();
+    let xs: IntVec = (1..=3).into_iter().collect();
+    let sum = xs.iter().sum();
+
+    hash_map.insert(xs, sum);
+
+    println!("hash_map: {hash_map:?}");
+    println!()
+}
+
+fn hash_custom_types() {
+    use std::collections::HashMap;
+    use std::hash::Hash;
+
+    #[derive(Debug, PartialEq, Eq, Hash)]
+    enum Animal {
+        Dog,
+        Cat,
+    }
+
+    #[derive(Debug)]
+    enum PetFood {
+        DogFood,
+        CatFood,
+    }
+
+    #[derive(Debug, PartialEq, Eq, Hash)]
+    struct Pet {
+        animal: Animal,
+        name: String,
+    }
+
+    // Pet, and Pet::animal are hashable, and so can be used as a key
+    // in a HashMap
+    type PetHashMap = HashMap<Pet, PetFood>;
+
+    fn get_pet<'a, 'b>(
+        pet_map: &'a PetHashMap,
+        name: &'b str,
+        animal: Animal,
+    ) -> Result<&'a Pet, String> {
+        let search_pet = Pet {
+            name: name.to_owned(),
+            animal,
+        };
+
+        match pet_map.get_key_value(&search_pet) {
+            None => Err("Pet not found!".to_owned()),
+            Some((pet, _)) => Ok(pet),
+        }
+    }
+
+    let kitty = Pet {
+        name: "kitty".to_owned(),
+        animal: Animal::Cat,
+    };
+    let doggy = Pet {
+        name: String::from("doggy"),
+        animal: Animal::Dog,
+    };
+    let pets = [kitty, doggy];
+    let mut pet_map: PetHashMap = HashMap::new();
+
+    pets.into_iter()
+        .map(|x| match x.animal {
+            Animal::Cat => pet_map.insert(x, PetFood::CatFood),
+            Animal::Dog => pet_map.insert(x, PetFood::DogFood),
+        })
+        .for_each(drop);
+
+    println!("pet_map: {pet_map:#?}\n");
+
+    let pet_search_result = get_pet(&pet_map, "kitty", Animal::Dog);
+
+    println!("invalid pet search result: {pet_search_result:#?}");
+
+    let pet_search_result = get_pet(&pet_map, "kitty", Animal::Cat);
+    println!("valid pet search result: {pet_search_result:#?}");
     println!()
 }
 
@@ -508,4 +596,6 @@ fn main() {
     hashmap_interactions();
     hash_map_string_str();
     hash_primitive_keys();
+    hash_collection();
+    hash_custom_types();
 }
