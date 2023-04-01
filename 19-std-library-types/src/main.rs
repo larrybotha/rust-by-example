@@ -562,6 +562,58 @@ fn hash_custom_types() {
     println!()
 }
 
+fn hash_set_union() {
+    use std::collections::HashSet;
+
+    let x = HashSet::<u32>::from_iter(vec![1, 2, 3]);
+    let y = HashSet::<u32>::from_iter(vec![3, 4, 5]);
+
+    println!("hash set union");
+    println!("x: {x:?}");
+    println!("y: {y:?}");
+    println!("union: {:?}", x.union(&y));
+    println!()
+}
+
+fn hash_set_difference() {
+    use std::collections::HashSet;
+
+    let x = HashSet::<u32>::from_iter(0..=3);
+    let y = HashSet::<u32>::from_iter(2..=5);
+
+    println!("hash set difference");
+    println!("x: {x:?}");
+    println!("y: {y:?}");
+    println!("difference: {:?}", x.difference(&y));
+    println!()
+}
+
+fn hash_set_intersection() {
+    use std::collections::HashSet;
+
+    let x = HashSet::<u32>::from_iter(0..=3);
+    let y = HashSet::<u32>::from_iter(2..=5);
+
+    println!("hash set intersection");
+    println!("x: {x:?}");
+    println!("y: {y:?}");
+    println!("intersection: {:?}", x.intersection(&y));
+    println!()
+}
+
+fn hash_set_symmetric_difference() {
+    use std::collections::HashSet;
+
+    let x = HashSet::<u32>::from_iter(0..=3);
+    let y = HashSet::<u32>::from_iter(2..=5);
+
+    println!("hash set symmetric_difference");
+    println!("x: {x:?}");
+    println!("y: {y:?}");
+    println!("symmetric difference: {:?}", x.intersection(&y));
+    println!()
+}
+
 fn main() {
     boxed_values();
 
@@ -598,4 +650,10 @@ fn main() {
     hash_primitive_keys();
     hash_collection();
     hash_custom_types();
+
+    // hashset
+    hash_set_union();
+    hash_set_difference();
+    hash_set_intersection();
+    hash_set_symmetric_difference();
 }

@@ -2,6 +2,7 @@
 
 - https://doc.rust-lang.org/stable/rust-by-example/std.html
 - https://doc.rust-lang.org/std/
+- https://doc.rust-lang.org/std/collections/index.html
 
 ## Takeaways
 
@@ -73,11 +74,11 @@
 - Rust has two types of strings:
   - `String`, which is heap-allocated, and represents a `Vec<u8>`
   - `&str`, which is a reference to stack-allocated `[u8]`, which is also known
-    an as a string slice
+    as a string slice
 - `String` and `&str` are always guaranteed to contain UTF-8 characters
 - `String` and `&str` have various `.split_` methods, which convert the strings
   into iterators
-- `str::chars` will return a `Char` which is an iterator over `char`
+- `str::chars` will return a `Chars` which is an iterator over `char`
 - backslashes are used to escape characters in strings. The [Tokens](https://doc.rust-lang.org/reference/tokens.html)
   in the book covers techniques for escaping
 
@@ -176,6 +177,21 @@
   hash_map.insert(xs, 0);
   // => {[1,2,3]: 0}
   ```
+
+### HashSet
+
+- similar to Javascript's `Set`, Rust's `HashSet` is collection of values that
+  are guaranteed not to contain duplicates
+- `HashSet` is a wrapper for `HashMap<T, ()>` - a `HashSet` is a `HashMap` where
+  we care only about the keys
+- sets have 4 primary operations:
+  - `union` - given 2 sets, get all unique elements from both sets
+  - `difference` - get all the values that are in the first set, and that are
+    not in the second set
+  - `intersection` - get all elements that are common to both sets
+  - `symmetric_difference` - get elements from both sets that are not found in
+    the other set - `XOR`
+- all of these operations return iterators
 
 ## Additional
 
