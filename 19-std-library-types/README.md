@@ -193,6 +193,37 @@
     the other set - `XOR`
 - all of these operations return iterators
 
+### Rc / Reference counting
+
+- `Rc` can be used when _multiple ownership_ is required, i.e. multiple
+  variables with a reference to the same value
+- `Rc` keeps track of the number of owners of a value:
+
+  ```rust
+  use std::rc::Rc;
+
+  let x = "something".to_string();
+  let rc_a: Rc::<String> = Rc::new(x);
+  let rc_b: Rc::<String> = Rc::clone(&rc_a);
+
+  // => 2 references
+  ```
+
+- as references come in and out of scope, `Rc` will increment the reference
+  counter. The count can be read using `Rc::strong_count(&rc)`:
+
+  ```rust
+  let x = "foo".to_string();
+  let rc: Rc<String> = Rc::new(x);
+
+  println!("count: {}", Rc::strong_count(&rc));
+  ```
+
+- two instances of `Rc` are equal if their inner values are equal
+- methods on the values inside `Rc`s are available directly on the `Rc` instance
+- cloning `Rc`s never create deep copies - a new reference to the inner value is
+  created instead
+
 ## Additional
 
 - to determine the number of bytes a value occupies on the stack, one can use

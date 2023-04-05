@@ -614,6 +614,40 @@ fn hash_set_symmetric_difference() {
     println!()
 }
 
+fn rc_example() {
+    use std::rc::Rc;
+
+    let text = "something this way comes".to_string();
+
+    {
+        let rc_a: Rc<String> = Rc::new(text);
+
+        println!("rc_a reference count: {}", Rc::strong_count(&rc_a));
+
+        {
+            let rc_b: Rc<String> = Rc::clone(&rc_a);
+
+            println!("rc_a reference count: {}", Rc::strong_count(&rc_a));
+            println!("rc_b reference count: {}", Rc::strong_count(&rc_b));
+
+            println!();
+
+            println!("rc_a and rc_b are equal: {}", rc_a.eq(&rc_b));
+            println!();
+
+            println!("length of string in rc_a: {}", rc_a.len());
+            println!("value in rc_b: {}", rc_b);
+            println!();
+        }
+
+        println!("rc_b has now been dropped");
+        println!();
+    }
+
+    println!("rc_a has now been dropped");
+    println!();
+}
+
 fn main() {
     boxed_values();
 
@@ -656,4 +690,7 @@ fn main() {
     hash_set_difference();
     hash_set_intersection();
     hash_set_symmetric_difference();
+
+    // Rc, or, Reference Counting
+    rc_example();
 }
