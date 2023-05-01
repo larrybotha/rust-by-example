@@ -59,7 +59,6 @@
   for (i, x) in xs.iter().enumerate() {
     println!("x at {}: {}", i, x);
   }
-
   ```
 
 - one can mutably iterate over a mutable vector using `Vec::iter_mut`
@@ -221,8 +220,34 @@
 
 - two instances of `Rc` are equal if their inner values are equal
 - methods on the values inside `Rc`s are available directly on the `Rc` instance
-- cloning `Rc`s never create deep copies - a new reference to the inner value is
+- cloning `Rc`s never creates deep copies - a new reference to the inner value is
   created instead
+
+### Arc / Atomic reference counting
+
+- reference counting across threads can be achieved by using `std::sync::Arc`
+
+  ```rust
+  use std::sync::Arc;
+  use std::thread;
+  use std::Duration;
+
+  let value = Arc::new("my value");
+
+  for _ in 0..5 {
+      // reference count increased
+      let my_ref = Arc::clone(value);
+
+      thread::spawn(move || {
+          // move the reference into the thread, and use it
+          println!("referenced value is: {}", my_ref)
+      })
+  }
+
+  // block the application to ensure all threads are printed before the
+  // application exits
+  thread::sleep(Duration::from_secs(1));
+  ```
 
 ## Additional
 
@@ -244,6 +269,8 @@
 
   println!("address of xs[0]: {:p}", &xs[0]);
   ```
+
+  This is akin to Python's `id`
 
 - `Vec::sort` and `Vec::dedup` are useful methods on `Vec`
 - assigning `None` to a variable requires the type to be explicitly annotated:
@@ -273,9 +300,14 @@
 
   ```rust
   let xs = vec![1,2,3];
-  let maybe_sum: Option<i32> = xs.iter().copied().reduce(|acc, x| acc + x);
+  let maybe_total: Option<i32> = xs.iter()
+                                 .copied()
+                                 .reduce(|acc, x| acc + x);
   // Rust suggests using `sum` here, too
-  let sum = xs.iter().fold(0, |acc, x| acc + x);
+  let total = xs.iter()
+              .fold(0, |acc, x| acc + x);
 
-  assert_eq!(Some(sum), maybe_sum);
+  assert_eq!(Some(total), maybe_total);
   ```
+
+- threads can be spawned using `std::thread::spawn`

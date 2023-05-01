@@ -138,8 +138,8 @@ fn vector_out_of_bounds_panics() {
 fn vector_for_iteration() {
     let xs = vec![1, 2, 3];
 
-    for x in xs.iter() {
-        println!("x: {}", x);
+    for (i, x) in xs.iter().enumerate() {
+        println!("x at {i}: {x}");
     }
     println!()
 }
@@ -648,6 +648,35 @@ fn rc_example() {
     println!();
 }
 
+fn arc_example() {
+    use std::sync::Arc;
+    use std::thread;
+    use std::time::Duration;
+
+    // create the reference counter
+    let apple = Arc::new("This is an apple...?");
+
+    for _ in 0..10 {
+        // create a clone of the value
+        let nested_apple = Arc::clone(&apple);
+
+        // Spawn a thread, moving the value into the closure.
+        // The value needs to be moved, as a spawned thread may outlive the
+        // application, and thuse we need the value to outlive the application
+        thread::spawn(move || {
+            // use the value
+            println!("{}", nested_apple);
+            // print the number of references to the value
+            println!("refs: {}", Arc::strong_count(&nested_apple))
+        });
+    }
+
+    // ensure that all messages from spawned threads are printed
+    thread::sleep(Duration::from_secs(1));
+
+    println!()
+}
+
 fn main() {
     boxed_values();
 
@@ -693,4 +722,7 @@ fn main() {
 
     // Rc, or, Reference Counting
     rc_example();
+
+    // Arc, or Atomic Reference Counting
+    arc_example();
 }
