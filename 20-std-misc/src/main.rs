@@ -51,6 +51,7 @@ fn thread_map_reduce() {
     let nested_threads = parts.chunks(MAX_THREADS).map(|xs| {
         xs.iter().enumerate().map(|(i, &x)| {
             thread::spawn(move || {
+                // note how execution order of threads is not necessarily in order
                 println!("thread {i} executing for {x}");
 
                 x.chars()
