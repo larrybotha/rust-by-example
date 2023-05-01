@@ -35,4 +35,17 @@
   }
   ```
 
-- the OS decides when to execute each thread
+- threads are scheduled by the OS
+
+## Additional
+
+- Rust suggests avoiding `Array::map` for large arrays and when
+  [chaining `.map`](http://doc.rust-lang.org/1.69.0/std/primitive.array.html#method.map)
+  due to performance issues related to how much of the stack becomes
+  utilised, and instead converting the array into an iterator using `.iter` or
+  `.into_iter`
+- `.map` for side effects
+  [is not considered idiomatic Rust](http://doc.rust-lang.org/1.69.0/std/iter/trait.Iterator.html#method.map)
+  -- `for` loops are suggested for code where there is a side effect in a loop
+- `Iterator::inspect` works like `.map`, allowing for something to be done with
+  the value in the iteration, but then implicitly returns the iterated value
