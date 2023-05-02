@@ -36,6 +36,8 @@
   ```
 
 - threads are scheduled by the OS
+- threads are not an infinite resource - it's a good idea to limit the number of
+  concurrent threads that may be spawned
 
 ## Additional
 
@@ -49,3 +51,13 @@
   -- `for` loops are suggested for code where there is a side effect in a loop
 - `Iterator::inspect` works like `.map`, allowing for something to be done with
   the value in the iteration, but then implicitly returns the iterated value
+- the current thread ID can be retrieved as such:
+
+  ```rust
+  thread::spawn(|| {
+      println!("my thread ID is {:?}", thread::current().id());
+  })
+  ```
+
+- using `.map` on on iterable returns a `Map` struct - note its difference to
+  `HashMap`: http://doc.rust-lang.org/1.69.0/std/iter/struct.Map.html

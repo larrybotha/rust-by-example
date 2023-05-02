@@ -52,7 +52,10 @@ fn thread_map_reduce() {
         xs.iter().enumerate().map(|(i, &x)| {
             thread::spawn(move || {
                 // note how execution order of threads is not necessarily in order
-                println!("thread {i} executing for {x}");
+                println!(
+                    "thread #{i} with id {:?} executing for {x}",
+                    thread::current().id()
+                );
 
                 x.chars()
                     .map(|c| c.to_digit(10).expect("expected digit"))
@@ -61,7 +64,6 @@ fn thread_map_reduce() {
         })
     });
     let total: u32 = nested_threads
-        .into_iter()
         .enumerate()
         .inspect(|(i, _)| println!("\n---\nthread group {i} running...\n---"))
         .flat_map(|(_, xs)| {
