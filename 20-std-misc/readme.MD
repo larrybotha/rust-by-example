@@ -1,6 +1,7 @@
 # `std` misc
 
 - https://doc.rust-lang.org/stable/rust-by-example/std_misc.html
+- [mpsc - Multi Producer, Single Consumer](http://doc.rust-lang.org/1.69.0/std/sync/mpsc/index.html)
 
 ## Takeaways
 
@@ -29,15 +30,49 @@
   }
 
   for x in threads {
-      let result = x.join();
+    // JoinHandle::join is synchronous, and waits for the thread to
+    // complete before moving on
+    let result = x.join();
 
-      println!("{result:?}");
+    println!("{result:?}");
   }
   ```
 
 - threads are scheduled by the OS
 - threads are not an infinite resource - it's a good idea to limit the number of
   concurrent threads that may be spawned
+
+### Channels
+
+- channels allow for communication between threads in a uni-directional manner -
+  values can be produced by multiple senders, but can only be received by a
+  single receiver
+- `mpsc` means Multiple Producer, Single Consumer, which describes how channels
+  work:
+
+  - we create a channel that returns a tuple with a sender and receiver:
+
+    ```rust
+    use std::sync::mpsc;
+
+    let (tx, rx) = mpsc::channel();
+    ```
+
+  - we send messages using the sender:
+
+    ```rust
+    use std::thread;
+
+    thread::spawn(move || {
+        tx.send("some value").unwrap();
+    })
+    ```
+
+  - we receive messages with the receiver:
+
+    ```rust
+    let result = rx.recv().unwrap()
+    ```
 
 ## Additional
 

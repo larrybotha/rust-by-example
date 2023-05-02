@@ -79,8 +79,66 @@ fn thread_map_reduce() {
     println!()
 }
 
+fn channel_example() {
+    use std::sync::mpsc;
+    use std::sync::mpsc::{Receiver, Sender};
+    use std::thread;
+
+    static NUM_THREADS: i32 = 3;
+
+    let (tx, rx): (Sender<i32>, Receiver<i32>) = mpsc::channel();
+    let mut join_handles = Vec::new();
+
+    for id in 0..NUM_THREADS {
+        // for multiple senders, the sender can be cloned
+        let thread_sender = tx.clone();
+        // spawn a thread, creating a JoinHandle
+        let join_handle = thread::spawn(move || {
+            // send a message to the receiver, taking ownership of the
+            // sender
+            // We are queuing a message in the channel here
+            thread_sender.send(id).unwrap();
+
+            println!(
+                "thread {:?} finished with value {id}",
+                thread::current().id()
+            );
+        });
+
+        // append the JoinHandle to the others
+        join_handles.push(join_handle)
+    }
+
+    let mut received_ids = Vec::with_capacity(NUM_THREADS as usize);
+
+    // Collect all the messages sent to the channel.
+    // We need to loop over however many messages were sent - if we send
+    // more messages, say by using thread_sender multiple times in each
+    // spawned thread, then with this loop we'd only received the first
+    // few messages
+    for _ in 0..NUM_THREADS {
+        println!("receiving");
+        // push each message the channel receives onto our vector
+        received_ids.push(rx.recv());
+    }
+
+    // Wait for every thread to complete its work before moving on
+    for handle in join_handles {
+        println!("joining {:?}", handle.thread().id());
+        // wait for the thread to finish its work
+        handle.join().expect("oops, child thread panicked!")
+    }
+
+    println!("\nreceived_ids: {received_ids:?}");
+    println!()
+}
+
 // `main` is the main thread...
 fn main() {
+    // threads
     thread_example();
     thread_map_reduce();
+
+    // channels
+    channel_example();
 }
