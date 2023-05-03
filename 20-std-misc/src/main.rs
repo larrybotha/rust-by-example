@@ -133,6 +133,32 @@ fn channel_example() {
     println!()
 }
 
+fn path_example() {
+    use std::path::{Path, PathBuf};
+
+    let path = Path::new(".");
+
+    println!("displayable path: {}\n", path.display());
+
+    for child in path.read_dir().unwrap() {
+        println!("child: {child:?}");
+    }
+
+    let mut new_path: PathBuf = path.join("foo").join("bar");
+
+    println!("\nnew_path: {}", new_path.display());
+
+    new_path.push("baz");
+    println!("new_path: {}", new_path.display());
+    new_path.push("my-awesome-filename.txt");
+    println!("new_path: {}", new_path.display());
+
+    new_path.set_file_name("change-that-filename.txt");
+    println!("new_path: {}", new_path.display());
+
+    println!()
+}
+
 // `main` is the main thread...
 fn main() {
     // threads
@@ -141,4 +167,7 @@ fn main() {
 
     // channels
     channel_example();
+
+    // path
+    path_example();
 }

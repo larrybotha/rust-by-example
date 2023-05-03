@@ -2,6 +2,7 @@
 
 - https://doc.rust-lang.org/stable/rust-by-example/std_misc.html
 - [mpsc - Multi Producer, Single Consumer](http://doc.rust-lang.org/1.69.0/std/sync/mpsc/index.html)
+- http://doc.rust-lang.org/1.69.0/std/path/struct.Path.html
 
 ## Takeaways
 
@@ -73,6 +74,17 @@
     ```rust
     let result = rx.recv().unwrap()
     ```
+
+### Path
+
+- `Path` and `PathBuf` have a similar relationship to each other as `&str` and
+  `String`, where `Path` is a reference, and `PathBuf` is owned
+- `Path` values are immutable
+- `PathBuf` values are mutable, and can be dereferenced to `Path
+- Rust will automatically handle posix and Windows-style paths behind the scenes
+- using `Path::join` to create a new path results in a `PathBuf`
+- see [Metadata](http://doc.rust-lang.org/1.69.0/std/fs/struct.Metadata.html)
+  struct for more information related to files
 
 ## Additional
 
