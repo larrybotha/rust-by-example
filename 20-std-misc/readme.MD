@@ -85,6 +85,31 @@
 - using `Path::join` to create a new path results in a `PathBuf`
 - see [Metadata](http://doc.rust-lang.org/1.69.0/std/fs/struct.Metadata.html)
   struct for more information related to files
+- `Path::metadata` returns information about a file or directory similar to the
+  Unix `stat` command
+
+### File / IO
+
+- `File` represents an opened file, and wraps a file descriptor
+- because many things can go wrong when working with files, many of the methods
+  on `File` return `io::Result<T>`, which is an alias of `Result<T, io::Error>`
+
+#### `open`
+
+- as with context managers in Python, an opened file is automatically closed in
+  Rust when the value that owns the file descriptor is dropped
+- to open a file, we use the `File` module with `Path`:
+
+  ```rust
+  use std::fs::File;
+  use std::path::Path;
+
+  let path = Path::new("path/to/file.ext");
+  let file = match File::open(path) {
+      Ok(result) => result,
+      Err(reason) => panic!("unable to open file {}: {reason}", path.display()),
+  };
+  ```
 
 ## Additional
 

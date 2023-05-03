@@ -156,6 +156,65 @@ fn path_example() {
     new_path.set_file_name("change-that-filename.txt");
     println!("new_path: {}", new_path.display());
 
+    println!(
+        "metadata of README: {:#?}",
+        Path::new("./README.md").metadata()
+    );
+
+    println!()
+}
+
+fn file_auto_close() {
+    use std::fs::File;
+    use std::path::Path;
+
+    let readme = Path::new("./README.md");
+
+    if readme.exists() {
+        let file = match File::open(readme) {
+            Ok(result) => result,
+            Err(reason) => {
+                panic!("unable to open {}: {reason}", readme.display());
+            }
+        };
+
+        println!("file {}: {file:#?}", readme.display());
+        println!(
+            "about to drop variable 'file' {:p}, and close file...",
+            &file
+        )
+    }
+
+    println!("file closed!");
+    println!()
+}
+
+fn file_read() {
+    use std::fs::File;
+    use std::io::prelude::*;
+    use std::path::Path;
+
+    let readme = Path::new("./README.md");
+    let mut file = match File::open(readme) {
+        Ok(result) => result,
+        Err(reason) => panic!("unable to open {}: {reason}", readme.display()),
+    };
+    let mut contents = String::new();
+
+    match file.read_to_string(&mut contents) {
+        Ok(_) => {
+            println!("file read!")
+        }
+        Err(reason) => panic!(
+            "unable to read file contents for {}: {reason}",
+            readme.display()
+        ),
+    }
+
+    let first_line = contents.lines().next().unwrap();
+
+    println!("first line of {} is {first_line:?}", readme.display());
+
     println!()
 }
 
@@ -170,4 +229,8 @@ fn main() {
 
     // path
     path_example();
+
+    // file
+    file_auto_close();
+    file_read();
 }
