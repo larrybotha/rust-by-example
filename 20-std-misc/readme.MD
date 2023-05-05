@@ -93,6 +93,11 @@
 - `File` represents an opened file, and wraps a file descriptor
 - because many things can go wrong when working with files, many of the methods
   on `File` return `io::Result<T>`, which is an alias of `Result<T, io::Error>`
+- reading from files requires that `std::io::Read` is present in the
+  module - `std::io::Read` extends the `File` struct with the `.read_to_string`
+  method
+- writing to files requires that `std::io::Write` is used in the module, which
+  extends the `File` struct with a `.write` method
 
 #### `open`
 
@@ -108,6 +113,39 @@
   let file = match File::open(path) {
       Ok(result) => result,
       Err(reason) => panic!("unable to open file {}: {reason}", path.display()),
+  };
+  ```
+
+#### `create`
+
+- `create` will do one of the following when being called:
+  - if the file exists, the file's contents will be cleared
+  - open a new file
+- `create` opens files in a write-only mode
+- `File::write` expects a byte string - not a string - to be passed to it to
+  write to the file. Additionally, the file needs to be mutable in order to
+  write to it:
+
+  ```rust
+  use std::io::Write;
+  use std::fs::File;
+  use std::path::Path;
+
+  let path = Path::new("./to/file.txt");
+  let contents = "foo";
+  // File must be mutable to write to
+  let mut file = match File::create(path) {
+      Err(reason) => panic!("unable to create file {}: {reason}", path.display()),
+      Ok(result) => result,
+  };
+
+  // .write is present because of std::io::Write
+  match file.write(contents) {
+      Err(reason) => panic!(
+        "unable to write to file {}: {reason}",
+        path.display()
+      );
+      Ok(_) => println!("wrote to file!")
   };
   ```
 

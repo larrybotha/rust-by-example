@@ -191,7 +191,7 @@ fn file_auto_close() {
 
 fn file_read() {
     use std::fs::File;
-    use std::io::prelude::*;
+    use std::io::Read;
     use std::path::Path;
 
     let readme = Path::new("./README.md");
@@ -213,9 +213,30 @@ fn file_read() {
 
     let first_line = contents.lines().next().unwrap();
 
-    println!("first line of {} is {first_line:?}", readme.display());
+    println!("first line of {} is:\n{first_line:?}", readme.display());
 
     println!()
+}
+
+fn file_create() {
+    use std::fs::File;
+    use std::io::Write;
+    use std::path::Path;
+
+    let path = Path::new("./target/create.txt");
+    let displayable_path = path.display();
+    let mut file = match File::create(path) {
+        Err(reason) => panic!("Unable to create file for {displayable_path}: {reason}"),
+        Ok(result) => result,
+    };
+    let contents = "foo";
+
+    match file.write(contents.as_bytes()) {
+        Err(reason) => panic!("Unable to write to file {displayable_path}: {reason}"),
+        Ok(_) => println!("wrote to file!"),
+    }
+
+    println!();
 }
 
 // `main` is the main thread...
@@ -233,4 +254,5 @@ fn main() {
     // file
     file_auto_close();
     file_read();
+    file_create();
 }
