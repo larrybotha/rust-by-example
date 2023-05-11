@@ -23,8 +23,7 @@ fn thread_example() {
         .map(|child| child.join()) // wait for the thread to complete
         // or
         //.map(JoinHandle::join)
-        .map(|result| println!("{result:?}"))
-        .for_each(drop);
+        .for_each(|result| println!("{result:?}"));
 
     println!()
 }
@@ -32,7 +31,6 @@ fn thread_example() {
 #[allow(clippy::needless_collect)]
 fn thread_map_reduce() {
     use std::thread;
-    use std::thread::JoinHandle;
 
     const MAX_THREADS: usize = 12;
 
@@ -46,7 +44,7 @@ fn thread_map_reduce() {
         69920216438980873548808413720956532
         1627842 4 6374 52 589860345374828574668
     ";
-    let parts: Vec<&str> = data.split_whitespace().collect();
+    let parts: Vec<_> = data.split_whitespace().collect();
     // Build a nested list of threads, but DO NOT consume them
     let nested_threads = parts.chunks(MAX_THREADS).map(|xs| {
         xs.iter().enumerate().map(|(i, &x)| {
@@ -57,9 +55,12 @@ fn thread_map_reduce() {
                     thread::current().id()
                 );
 
-                x.chars()
+                let sum: u32 = x
+                    .chars()
                     .map(|c| c.to_digit(10).expect("expected digit"))
-                    .sum()
+                    .sum();
+
+                sum
             })
         })
     });
@@ -69,7 +70,7 @@ fn thread_map_reduce() {
         .flat_map(|(_, xs)| {
             // Consume each nested thread synchronously so that we never have
             // more than MAX_THREADS running concurrently
-            xs.collect::<Vec<JoinHandle<u32>>>()
+            xs.collect::<Vec<_>>()
                 .into_iter()
                 .map(|x| x.join().unwrap())
         })
@@ -84,7 +85,7 @@ fn channel_example() {
     use std::sync::mpsc::{Receiver, Sender};
     use std::thread;
 
-    static NUM_THREADS: i32 = 3;
+    const NUM_THREADS: i32 = 3;
 
     let (tx, rx): (Sender<i32>, Receiver<i32>) = mpsc::channel();
     let mut join_handles = Vec::new();

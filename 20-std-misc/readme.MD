@@ -171,3 +171,24 @@
 
 - using `.map` on on iterable returns a `Map` struct - note its difference to
   `HashMap`: http://doc.rust-lang.org/1.69.0/std/iter/struct.Map.html
+- `.collect` only cares about what values are being collected _into_ - not what
+  the actual values are. e.g. are we collecting into a `Vec` or `VecDeque`?
+
+  As a result, much of the time we can let `.collect` infer the type of the
+  value inside the collection:
+
+  ```rust
+  let my_string = "hey hey hey!";
+  let explicit_vec: Vec<&str> = my_string.split_whitespace().collect();
+  let inferred_vec: Vec<_> = my_string.split_whitespace().collect();
+  ```
+
+- `.map(...).for_each(drop)` may be unnecessary, as `.for_each` will drop values
+  anyways. The docs in both Rust and Javascript indicate that the use-case for
+  `.for_each` / `.forEach` is the execution of side effects
+- `static` vs `const`:
+  - use `static` when:
+    - you want a global variable that is mutable, or
+    - you need a variable with a non-`'static` lifetime
+  - use `const` when:
+    - you know the value at compile-time, and know that it won't ever change
