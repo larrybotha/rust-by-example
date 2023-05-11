@@ -188,7 +188,6 @@
   `.for_each` / `.forEach` is the execution of side effects
 - `static` vs `const`:
   - use `static` when:
-    - you want a global variable that is mutable, or
-    - you need a variable with a non-`'static` lifetime
+    - you want a global variable that is mutable
   - use `const` when:
     - you know the value at compile-time, and know that it won't ever change
