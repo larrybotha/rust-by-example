@@ -135,7 +135,7 @@ fn channel_example() {
 }
 
 fn path_example() {
-    use std::path::{Path, PathBuf};
+    use std::path::Path;
 
     let path = Path::new(".");
 
@@ -145,17 +145,26 @@ fn path_example() {
         println!("child: {child:?}");
     }
 
-    let mut new_path: PathBuf = path.join("foo").join("bar");
+    let new_path = path.join("foo").join("bar");
 
-    println!("\nnew_path: {}", new_path.display());
-
-    new_path.push("baz");
-    println!("new_path: {}", new_path.display());
-    new_path.push("my-awesome-filename.txt");
-    println!("new_path: {}", new_path.display());
-
-    new_path.set_file_name("change-that-filename.txt");
-    println!("new_path: {}", new_path.display());
+    [new_path]
+        .into_iter()
+        .inspect(|path| println!("new_path: {}", path.display()))
+        .map(|mut path| {
+            path.push("baz");
+            path
+        })
+        .inspect(|path| println!("new_path: {}", path.display()))
+        .map(|mut path| {
+            path.push("my-awesome-filename.txt");
+            path
+        })
+        .inspect(|path| println!("new_path: {}", path.display()))
+        .map(|mut path| {
+            path.set_file_name("change-that-filename.txt");
+            path
+        })
+        .for_each(|path| println!("new_path: {}", path.display()));
 
     println!(
         "metadata of README: {:#?}",
@@ -220,6 +229,7 @@ fn file_read() {
 }
 
 fn file_create() {
+    use std::fs;
     use std::fs::File;
     use std::io::Write;
     use std::path::Path;
@@ -237,7 +247,112 @@ fn file_create() {
         Ok(_) => println!("wrote to file!"),
     }
 
+    match fs::remove_file(path) {
+        Err(reason) => panic!("Unable to remove file: {displayable_path}: {reason}"),
+        Ok(_) => println!("removed file: {displayable_path}"),
+    }
+
     println!();
+}
+
+fn create_file(path: &std::path::Path, contents: String) -> std::fs::File {
+    use std::fs::File;
+    use std::io::Write;
+    use std::path::Path;
+
+    let displayable_path = path.display();
+
+    let mut file = match File::create(Path::new(path)) {
+        Err(reason) => panic!("Unable to create file {displayable_path}: {reason}"),
+        Ok(result) => result,
+    };
+
+    if let Err(reason) = file.write(contents.as_bytes()) {
+        panic!("Unable to write to file {displayable_path}: {reason}")
+    };
+
+    file
+}
+
+fn read_lines_beginner() {
+    use std::fs::{self, File};
+    use std::io::{self, BufRead, BufReader};
+    use std::path::Path;
+
+    // This is the beginner implementation here
+    //
+    // It is less efficient, because we render the entire string into memory
+    // before returning it.
+    // Instead, we could allow for each line to be read one at a time out of
+    // the file, as in the read_lines_efficient function
+    fn read_lines(filename: String) -> io::Lines<BufReader<File>> {
+        // open the file in read-only mode
+        let file = File::open(filename).unwrap();
+
+        // read the file:
+        //  - line by line
+        //  - returning an iterator of the lines
+        io::BufReader::new(file).lines()
+    }
+
+    let path = Path::new("./target/read-lines-beginner.txt");
+    let contents = ["foo", "bar", "baz"].join("\n");
+
+    create_file(path, contents);
+
+    // From ChatGPT:
+    //  Storing the iterator may result in holding unnecessary references and
+    //  additional memory usage, especially if the iterator is large or the
+    //  loop executes for a long time.
+    let lines = read_lines(path.to_str().unwrap().into());
+
+    lines
+        .into_iter()
+        .map(|line| line.unwrap())
+        .enumerate()
+        .for_each(|(index, line)| println!("line {}: {line}", index + 1));
+
+    if let Err(reason) = fs::remove_file(path) {
+        panic!("Unable to remove file {}: {reason}", path.display())
+    }
+
+    println!()
+}
+
+fn read_lines_efficient() {
+    use std::fs::{self, File};
+    use std::io::{self, BufRead};
+    use std::path::Path;
+
+    // Return a result, instead of the iterator.
+    fn read_lines<P>(path: P) -> io::Result<io::Lines<io::BufReader<File>>>
+    where
+        P: AsRef<Path>,
+    {
+        let file = File::open(path)?;
+
+        Ok(io::BufReader::new(file).lines())
+    }
+
+    let path = Path::new("./target/read-lines-efficient.txt");
+    let content = ["foo", "bar", "baz"].join("\n");
+
+    create_file(path, content);
+
+    // It's more efficient _not_ to assign the iterator to a variable.
+    // Instead, we consume it immediately, without holding onto a
+    // potentially large amount of data
+    if let Ok(lines) = read_lines(path) {
+        for (index, line) in lines.flatten().enumerate() {
+            println!("line {}: {line}", index + 1)
+        }
+    };
+
+    if let Err(reason) = fs::remove_file(path) {
+        panic!("Unable to remove file {}: {reason}", path.display())
+    }
+
+    println!()
 }
 
 // `main` is the main thread...
@@ -256,4 +371,8 @@ fn main() {
     file_auto_close();
     file_read();
     file_create();
+
+    // read_lines
+    read_lines_beginner();
+    read_lines_efficient();
 }

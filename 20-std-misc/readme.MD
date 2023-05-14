@@ -149,6 +149,24 @@
   };
   ```
 
+#### `read_lines`
+
+- we can use `std::io::Lines` and `std::io::BufReader` to read from a file:
+
+  ```rust
+  use std::path::Path;
+  use std::fs::File;
+  use std::io::{self, BufRead, BufReader};
+
+  let path = Path::new("path/to/file");
+  let file = File::open(path)?;
+  let lines = io::BufReader::new(file).lines();
+  ```
+
+- as when using `file.read_to_string` where we need to use `std::io::Read`, to
+  read from a buffer, such as with `io::BufReader::lines`, we need to use
+  `std::io::BufRead`
+
 ## Additional
 
 - Rust suggests avoiding `Array::map` for large arrays and when
@@ -191,3 +209,41 @@
     - you want a global variable that is mutable
   - use `const` when:
     - you know the value at compile-time, and know that it won't ever change
+- when matching on a single pattern, one can instead use `if let`, e.g.:
+
+  ```rust
+  // ...
+
+  // before
+  match file.write("foo".as_bytes()) {
+      Err(reason) => panic!("{reason}"), // panic
+      Ok(_) => () // else do nothing
+  }
+
+  // after
+  if let Err(reason) = file.write("foo".as_bytes()) {
+      panic!("{reason}")
+  };
+  ```
+
+- Rust warns that using `if let` inside a `for` loop is redundant, since the
+  success value is the only valid value. Instead, use `.flatten` on the
+  iterable first, to remove the indirection (i.e. `Ok` or `Some`), and then
+  work with the value directly:
+
+  ```rust
+  let xs = Vec::from([Ok(1), Ok(2)]);
+
+
+  // redundant use of `if let`
+  for x in xs.iter() {
+      if let Ok(value) = x {
+          // ...
+      }
+  }
+
+  // instead, use .flatten
+  for x in xs.iter().flatten() {
+      // ...
+  }
+  ```
