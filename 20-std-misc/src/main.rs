@@ -355,6 +355,30 @@ fn read_lines_efficient() {
     println!()
 }
 
+fn child_process_example() {
+    use std::process::Command;
+
+    // Command uses the builder pattern, where '.output' results in the actual
+    // execution of the child process
+    let output = Command::new("rustc")
+        .args(["--version"])
+        .output()
+        .unwrap_or_else(|e| panic!("Unable to run child process: {}", e));
+
+    [output]
+        .iter()
+        .map(|x| match x.status.success() {
+            true => Ok(String::from_utf8_lossy(&x.stdout)),
+            false => Err(String::from_utf8_lossy(&x.stderr)),
+        })
+        .for_each(|result| match result {
+            Err(err) => println!("Child process errored: {err}"),
+            Ok(out) => println!("Child process succeeded: \n\t{out}"),
+        });
+
+    println!()
+}
+
 // `main` is the main thread...
 fn main() {
     // threads
@@ -375,4 +399,7 @@ fn main() {
     // read_lines
     read_lines_beginner();
     read_lines_efficient();
+
+    // child processes
+    child_process_example();
 }

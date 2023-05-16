@@ -167,6 +167,17 @@
   read from a buffer, such as with `io::BufReader::lines`, we need to use
   `std::io::BufRead`
 
+## Child processes
+
+- child processes differ from threads in that:
+  - they are separate processes from the parent process
+  - they have access to the full operating system's memory, as opposed to only
+    the memory allocated to the parent process
+  - they communicate with the parent process via pipes or sockets, as opposed
+    to however the threading library is implemented
+- `process::Command` is a builder for processes
+- `process::Output` represents the output of a finished child process
+
 ## Additional
 
 - Rust suggests avoiding `Array::map` for large arrays and when
