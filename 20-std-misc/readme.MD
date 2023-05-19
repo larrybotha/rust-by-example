@@ -167,7 +167,7 @@
   read from a buffer, such as with `io::BufReader::lines`, we need to use
   `std::io::BufRead`
 
-## Child processes
+### Child processes
 
 - child processes differ from threads in that:
   - they are separate processes from the parent process
@@ -177,6 +177,54 @@
     to however the threading library is implemented
 - `process::Command` is a builder for processes
 - `process::Output` represents the output of a finished child process
+
+#### Pipes
+
+- `std::Child` is the struct that represents a running child process
+- a child process can be spawned using `std::process::Command::spawn`
+- `std::Child` can be piped to using `std::Child::pipe`
+- to communicate with a process via pipes:
+
+  - spawn a child process:
+
+    - using `Command::new`
+    - indicating that you want to communicate via pipes by using:
+      ```rust
+      let process = Command::new("somecommand")
+          .stdin(Stdio::piped())
+          .stdout(Stdio::piped())
+          // ...
+      ```
+    - unwrapping the `stdin` property on the process, and writing to
+      it:
+      ```rust
+      // requires std::io::Write to be imported
+      match process.stdin.unwrap().write_all("foo".as_bytes()) {
+          // ...
+      }
+      ```
+    - unwrapping the `stdout` property on the process, and reading to
+      a varable
+
+      ```rust
+      let mut x = String::new();
+
+      // requires std::io::Read
+      match process.stdout.unwrap().read_to_string(&mut x) {
+          // ...
+      }
+      ```
+
+- `std::process::{ChildStdin,ChildStdout}` are the handles for the pipes for the
+  child process
+- once `stdin` is piped to, it is dropped, which then results in the command
+  actually being executed. Without the `stdin` being dropped, the command
+  wouldn't get executed
+
+#### Waiting
+
+- we can wait for a child process to complete, in a somewhat asyncy way, using
+  `std::Child::wait`
 
 ## Additional
 
@@ -258,3 +306,6 @@
       // ...
   }
   ```
+
+- `.unwrap()` can be used when we know for certain that the value we're wrapping
+  is a `Some`

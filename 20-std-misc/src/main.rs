@@ -379,6 +379,69 @@ fn child_process_example() {
     println!()
 }
 
+fn child_process_pipes() {
+    use std::io::{Read, Write};
+    use std::process::{Child, Command, Stdio};
+
+    const PANGRAM: &str = "the quick brown fox jumped over the lazy dog";
+
+    // redundant type here for clarity
+    let process: Child = match Command::new("wc")
+        // allow for the child to be piped to
+        .stdin(Stdio::piped())
+        // allow for the child to be read from via pipes
+        .stdout(Stdio::piped())
+        // spawn the process
+        .spawn()
+    {
+        Ok(process) => process,
+        Err(reason) => panic!("Unable to spawn child process: {reason}"),
+    };
+
+    // write bytes to the child's stdin
+    //
+    // we can use .unwrap() here because _we_ specified that the command
+    // can be piped to - i.e. in this particular case we know that it's
+    // safe to unwrap without handling errors
+    match process.stdin.unwrap().write_all(PANGRAM.as_bytes()) {
+        Err(why) => panic!("Unable to pipe to wc: {}", why),
+        Ok(_) => println!("Sent pangram to wc"),
+    }
+
+    let mut output = String::new();
+
+    // read from the child's stdout
+    //
+    // the same applies for unwrapping here - we know that stdout can be
+    // safely unwrapped, because we specified that we will be communicating
+    // via pipes when the child was built
+    match process.stdout.unwrap().read_to_string(&mut output) {
+        Err(why) => panic!("Unable to read output from wc: {}", why),
+        Ok(_) => println!("output from wc read"),
+    }
+
+    println!("wc output: {}", output);
+    println!();
+}
+
+fn child_process_wait() {
+    use std::process::Command;
+
+    let sleepy_time = 3;
+    let mut child = Command::new("sleep")
+        .arg(format!("{}", sleepy_time))
+        .spawn()
+        .unwrap();
+
+    println!("sleeping {}s...", sleepy_time);
+
+    // explicitly wait for the child process to complete
+    let exit_status = child.wait().unwrap();
+
+    println!("{:#?}", exit_status);
+    println!();
+}
+
 // `main` is the main thread...
 fn main() {
     // threads
@@ -402,4 +465,6 @@ fn main() {
 
     // child processes
     child_process_example();
+    child_process_pipes();
+    child_process_wait();
 }
