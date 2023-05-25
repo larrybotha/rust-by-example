@@ -226,6 +226,10 @@
 - we can wait for a child process to complete, in a somewhat asyncy way, using
   `std::Child::wait`
 
+### Filesystem operations
+
+- the `std::fs` module provides an interface for dealing with the filesystem
+
 ## Additional
 
 - Rust suggests avoiding `Array::map` for large arrays and when

@@ -427,7 +427,7 @@ fn child_process_pipes() {
 fn child_process_wait() {
     use std::process::Command;
 
-    let sleepy_time = 3;
+    let sleepy_time = 1;
     let mut child = Command::new("sleep")
         .arg(format!("{}", sleepy_time))
         .spawn()
@@ -440,6 +440,37 @@ fn child_process_wait() {
 
     println!("{:#?}", exit_status);
     println!();
+}
+
+fn filesystem_operations() {
+    use std::fs::{File, OpenOptions};
+    use std::io;
+    use std::io::{Read, Write};
+    use std::path::Path;
+
+    fn cat(path: &Path) -> io::Result<String> {
+        let mut file = File::open(path)?;
+        let mut contents = String::new();
+
+        match file.read_to_string(&mut contents) {
+            Ok(_) => Ok(contents),
+            Err(e) => Err(e),
+        }
+    }
+
+    // similar to `$ echo foo > my-file.txt`
+    fn echo_to_file(value: &str, path: &Path) -> io::Result<()> {
+        let mut file = File::open(path)?;
+
+        file.write_all(value.as_bytes())
+    }
+
+    fn touch(path: &Path) -> io::Result<()> {
+        match OpenOptions::new().create(true).write(true).open(path) {
+            Ok(_) => Ok(()),
+            Err(e) => Err(e),
+        }
+    }
 }
 
 // `main` is the main thread...
@@ -467,4 +498,7 @@ fn main() {
     child_process_example();
     child_process_pipes();
     child_process_wait();
+
+    // filesystem operations
+    filesystem_operations();
 }
