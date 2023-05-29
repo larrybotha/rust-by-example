@@ -4,6 +4,24 @@
 - [mpsc - Multi Producer, Single Consumer](http://doc.rust-lang.org/1.69.0/std/sync/mpsc/index.html)
 - http://doc.rust-lang.org/1.69.0/std/path/struct.Path.html
 
+<!-- toc -->
+
+- [Takeaways](#takeaways)
+  - [Threads](#threads)
+  - [Channels](#channels)
+  - [Path](#path)
+  - [File / IO](#file--io)
+    - [`open`](#open)
+    - [`create`](#create)
+    - [`read_lines`](#read_lines)
+  - [Child processes](#child-processes)
+    - [Pipes](#pipes)
+    - [Waiting](#waiting)
+  - [Filesystem operations](#filesystem-operations)
+- [Additional](#additional)
+
+<!-- tocstop -->
+
 ## Takeaways
 
 ### Threads
@@ -253,63 +271,4 @@
 - using `.map` on on iterable returns a `Map` struct - note its difference to
   `HashMap`: http://doc.rust-lang.org/1.69.0/std/iter/struct.Map.html
 - `.collect` only cares about what values are being collected _into_ - not what
-  the actual values are. e.g. are we collecting into a `Vec` or `VecDeque`?
-
-  As a result, much of the time we can let `.collect` infer the type of the
-  value inside the collection:
-
-  ```rust
-  let my_string = "hey hey hey!";
-  let explicit_vec: Vec<&str> = my_string.split_whitespace().collect();
-  let inferred_vec: Vec<_> = my_string.split_whitespace().collect();
-  ```
-
-- `.map(...).for_each(drop)` may be unnecessary, as `.for_each` will drop values
-  anyways. The docs in both Rust and Javascript indicate that the use-case for
-  `.for_each` / `.forEach` is the execution of side effects
-- `static` vs `const`:
-  - use `static` when:
-    - you want a global variable that is mutable
-  - use `const` when:
-    - you know the value at compile-time, and know that it won't ever change
-- when matching on a single pattern, one can instead use `if let`, e.g.:
-
-  ```rust
-  // ...
-
-  // before
-  match file.write("foo".as_bytes()) {
-      Err(reason) => panic!("{reason}"), // panic
-      Ok(_) => () // else do nothing
-  }
-
-  // after
-  if let Err(reason) = file.write("foo".as_bytes()) {
-      panic!("{reason}")
-  };
-  ```
-
-- Rust warns that using `if let` inside a `for` loop is redundant, since the
-  success value is the only valid value. Instead, use `.flatten` on the
-  iterable first, to remove the indirection (i.e. `Ok` or `Some`), and then
-  work with the value directly:
-
-  ```rust
-  let xs = Vec::from([Ok(1), Ok(2)]);
-
-
-  // redundant use of `if let`
-  for x in xs.iter() {
-      if let Ok(value) = x {
-          // ...
-      }
-  }
-
-  // instead, use .flatten
-  for x in xs.iter().flatten() {
-      // ...
-  }
-  ```
-
-- `.unwrap()` can be used when we know for certain that the value we're wrapping
-  is a `Some`
+  the actual values are. e.g. are we collecting into a `Vec` or `
