@@ -222,7 +222,7 @@
       }
       ```
     - unwrapping the `stdout` property on the process, and reading to
-      a varable
+      a variable
 
       ```rust
       let mut x = String::new();
@@ -236,8 +236,8 @@
 - `std::process::{ChildStdin,ChildStdout}` are the handles for the pipes for the
   child process
 - once `stdin` is piped to, it is dropped, which then results in the command
-  actually being executed. Without the `stdin` being dropped, the command
-  wouldn't get executed
+  actually being called. Without the `stdin` being dropped, the command
+  wouldn't get called
 
 #### Waiting
 
